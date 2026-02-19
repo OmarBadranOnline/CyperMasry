@@ -175,8 +175,8 @@ export default function AdminPage() {
                         ] as const).map(item => (
                             <button key={item.id} onClick={() => setTab(item.id)}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-mono text-xs transition-all ${tab === item.id
-                                        ? 'bg-neon-amber/10 text-neon-amber border border-neon-amber/20'
-                                        : 'text-gray-500 hover:text-white hover:bg-dark-border/50'
+                                    ? 'bg-neon-amber/10 text-neon-amber border border-neon-amber/20'
+                                    : 'text-gray-500 hover:text-white hover:bg-dark-border/50'
                                     }`}>
                                 <item.icon size={14} />
                                 <div className="text-left">
@@ -348,7 +348,7 @@ export default function AdminPage() {
                                                                         ] as const).map(([field, label, type]) => (
                                                                             <div key={field}>
                                                                                 <label className="block font-mono text-xs text-gray-600 mb-1">{label}</label>
-                                                                                <input type={type} value={(editData as Record<string, string>)[field] ?? ''}
+                                                                                <input type={type} value={(editData as any)[field] ?? ''}
                                                                                     onChange={e => setEditData(p => ({ ...p, [field]: e.target.value }))}
                                                                                     className="w-full bg-dark-bg border border-dark-border rounded-lg px-3 py-2 font-mono text-xs text-white focus:outline-none focus:border-neon-amber/40" />
                                                                             </div>
@@ -448,7 +448,7 @@ export default function AdminPage() {
                                                 <div className="relative">
                                                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-600">{icon}</span>
                                                     <input type={type} placeholder={ph}
-                                                        value={(createData as Record<string, string>)[field] ?? ''}
+                                                        value={(createData as any)[field] ?? ''}
                                                         onChange={e => setCreateData(p => ({ ...p, [field]: e.target.value }))}
                                                         className="w-full bg-dark-bg border border-dark-border rounded-xl pl-10 pr-4 py-3 font-mono text-sm text-white placeholder-gray-700 focus:outline-none focus:border-neon-amber/60 transition-colors" />
                                                 </div>
