@@ -2,7 +2,7 @@
 
 # 🛡️ Cyber-Masry | سايبر مصري
 
-**An interactive, gamified cybersecurity learning platform built for Egyptian IT 102 students.**
+**An interactive, gamified cybersecurity learning platform built for Zewailcity IT 102 students.**
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
