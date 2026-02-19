@@ -1,0 +1,16 @@
+# Netlify build configuration
+# This file lives at the repo root and overrides any UI settings.
+
+[build]
+  # cd into frontend/ before running the build
+  base    = "frontend"
+  command = "npm run build"
+  # publish the built output — relative to base, so this is frontend/dist
+  publish = "dist"
+
+# React Router (client-side routing) — serve index.html for all paths
+# so /labs, /lab/:slug etc. work on direct-load / refresh
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
