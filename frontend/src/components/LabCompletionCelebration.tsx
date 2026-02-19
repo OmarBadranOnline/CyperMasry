@@ -56,8 +56,10 @@ function Confetti() {
         const canvas = canvasRef.current
         if (!canvas) return
         const ctx = canvas.getContext('2d')!
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
+        // Capture in a narrowed const so the tick closure below sees a non-null canvas
+        const c = canvas
+        c.width = window.innerWidth
+        c.height = window.innerHeight
 
         function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
             ctx.beginPath()
@@ -73,7 +75,7 @@ function Confetti() {
         }
 
         function tick() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.clearRect(0, 0, c.width, c.height)
             particlesRef.current = particlesRef.current
                 .map((p) => ({
                     ...p,
@@ -89,7 +91,7 @@ function Confetti() {
                 ctx.save()
                 ctx.globalAlpha = p.opacity
                 ctx.fillStyle = p.color
-                ctx.translate((p.x / 100) * canvas.width, (p.y / 100) * canvas.height)
+                ctx.translate((p.x / 100) * c.width, (p.y / 100) * c.height)
                 ctx.rotate((p.rotation * Math.PI) / 180)
                 if (p.shape === 'rect') {
                     ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2)
