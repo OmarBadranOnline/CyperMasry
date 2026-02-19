@@ -29,7 +29,7 @@ db.init_app(app)
 # ─── JWT helpers ──────────────────────────────────────────────────────────────
 def make_token(user_id: int) -> str:
     payload = {
-        'sub': user_id,
+        'sub': str(user_id),
         'exp': datetime.now(timezone.utc) + timedelta(hours=app.config['JWT_EXP_HOURS']),
         'iat': datetime.now(timezone.utc),
     }
@@ -39,37 +39,18 @@ def make_token(user_id: int) -> str:
 def decode_token(token: str) -> dict | None:
     try:
         return pyjwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-    except pyjwt.ExpiredSignatureError:
-        print(f"[!] Token expired: {token[:10]}...")
-        return None
-    except pyjwt.InvalidTokenError as e:
-        print(f"[!] Invalid token: {e} | Token: {token[:10]}...")
+    except (pyjwt.ExpiredSignatureError, pyjwt.InvalidTokenError):
         return None
 
-
-def log_debug(msg):
-    try:
-        with open("backend_debug.log", "a") as f:
-            f.write(f"{datetime.now()} - {msg}\n")
-    except:
-        pass
 
 def get_current_user() -> User | None:
     auth = request.headers.get('Authorization', '')
-    log_debug(f"Auth Header: {auth}")
     if not auth.startswith('Bearer '):
-        log_debug("No Bearer token")
         return None
     payload = decode_token(auth[7:])
     if not payload:
-        log_debug("Payload decode failed")
         return None
-    user = db.session.get(User, payload.get('sub'))
-    if not user:
-        log_debug(f"User {payload.get('sub')} not found in DB")
-    else:
-        log_debug(f"User found: {user.username}")
-    return user
+    return db.session.get(User, payload.get('sub'))
 
 
 # ─── Decorators ───────────────────────────────────────────────────────────────
