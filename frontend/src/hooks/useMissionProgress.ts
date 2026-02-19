@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 
 export interface MissionStep {
     id: number
-    tool: 'terminal' | 'zoogle' | 'linkedin'
+    tool: 'terminal' | 'zoogle' | 'linkedin' | 'quiz' | 'login'
     title: string
     objective: string     // English instruction
     hint: string          // the command/query to type

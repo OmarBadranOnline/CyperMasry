@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useProgress } from '../../context/ProgressContext'
 
 export interface MissionStep {
     id: number
@@ -95,6 +96,7 @@ function saveProgress(steps: MissionStep[]) {
 }
 
 export function useMissionProgress() {
+    const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
     const currentStepId = steps.find((s) => !s.completed)?.id ?? null
@@ -104,7 +106,10 @@ export function useMissionProgress() {
     const completeStep = useCallback((stepId: number) => {
         setSteps((prev) => {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
-            saveProgress(next)
+            if (next !== prev) {
+                saveProgress(next) // local storage
+                saveStep(1, stepId) // server sync
+            }
             return next
         })
     }, [])

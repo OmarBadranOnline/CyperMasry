@@ -1,4 +1,11 @@
-import { useState } from 'react'
+/**
+ * Lab 02 — El-Tafteesh (Port Scanning with Nmap)
+ *
+ * Layout identical to pages/Lab01.tsx:
+ *  • Left panel  → mission tracker (step list, progress, concepts)
+ *  • Right panel → NmapTerminal simulator (terminal-only, no tabs)
+ */
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     BookOpen,
@@ -14,31 +21,69 @@ import {
     RotateCcw,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import ZoogleSearch from '../components/ZoogleSearch'
-import TerminalSimulator from '../components/TerminalSimulator'
-import FakeLinkedIn from '../components/FakeLinkedIn'
-import FloatingAssistant from '../components/FloatingAssistant'
-import { useMissionProgress } from '../hooks/useMissionProgress'
+import Header from '../../components/Header'
+import Footer from '../../components/Footer'
+import FloatingAssistant from '../../components/FloatingAssistant'
+import LabCompletionCelebration from '../../components/LabCompletionCelebration'
+import NmapTerminal from './NmapTerminal'
+import { useMissionProgress } from './useMissionProgress'
 
-type ActiveTab = 'zoogle' | 'terminal' | 'linkedin'
-
-export default function Lab01() {
+export default function Lab02() {
     const navigate = useNavigate()
-    const [activeTab, setActiveTab] = useState<ActiveTab>('terminal')
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
-    const { steps, currentStepId, allComplete, completedCount, completeStep } = useMissionProgress()
+    const [showCelebration, setShowCelebration] = useState(false)
+    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } =
+        useMissionProgress()
 
     const totalSteps = steps.length
     const progressPct = Math.round((completedCount / totalSteps) * 100)
 
-    // Auto-switch tab when the current step changes tool
-    const currentStep = steps.find((s) => s.id === currentStepId)
-    const switchToTool = (tool: string) => {
-        if (['terminal', 'zoogle', 'linkedin'].includes(tool) && tool !== activeTab)
-            setActiveTab(tool as ActiveTab)
+    /* ── Show celebration when all complete ─────────────────────────────── */
+    useEffect(() => {
+        if (allComplete) setShowCelebration(true)
+    }, [allComplete])
+
+    /* ── Command → step mapping ────────────────────────────────────────────────── */
+    const handleCommandRun = (cmd: string) => {
+        const c = cmd.trim().toLowerCase()
+        const parts = c.split(/\s+/)
+        const flags = parts.filter((p) => p.startsWith('-'))
+        const hasFlag = (f: string) => flags.some((fl) => fl === f.toLowerCase())
+
+        // Step 1: basic nmap scan
+        if (c === 'nmap 192.168.1.5' && !steps[0].completed) { completeStep(1); return }
+
+        // Step 2: version detection (-sV or -sv)
+        if (hasFlag('-sv') && c.includes('192.168.1.5') && !steps[1].completed) { completeStep(2); return }
+
+        // Step 3: targeted port scan (-p flag, not -p-)
+        if (hasFlag('-p') && !c.includes('-p-') && c.includes('192.168.1.5') && !steps[2].completed) { completeStep(3); return }
+
+        // Step 4: OS fingerprinting (-O)
+        if (hasFlag('-o') && c.includes('192.168.1.5') && !steps[3].completed) { completeStep(4); return }
+
+        // Step 5: aggressive scan (-A)
+        if (hasFlag('-a') && !hasFlag('-t4') && c.includes('192.168.1.5') && !steps[4].completed) { completeStep(5); return }
+
+        // Step 6: full port scan (-p-)
+        if (c.includes('-p-') && c.includes('192.168.1.5') && !steps[5].completed) { completeStep(6); return }
+
+        // Step 7: UDP scan (-sU or -su)
+        if (hasFlag('-su') && c.includes('192.168.1.5') && !steps[6].completed) { completeStep(7); return }
+
+        // Step 8: fast scan (-T4 -F)
+        if (hasFlag('-t4') && hasFlag('-f') && c.includes('192.168.1.5') && !steps[7].completed) { completeStep(8); return }
+
+        // Step 9: NSE vuln scripts
+        if (c.includes('--script') && c.includes('vuln') && c.includes('192.168.1.5') && !steps[8].completed) { completeStep(9); return }
+
+        // Step 10: host discovery ping sweep
+        if (hasFlag('-sn') && (c.includes('192.168.1.0') || c.includes('/24')) && !steps[9].completed) {
+            completeStep(10)
+            setShowCelebration(true)
+        }
     }
+
 
     return (
         <div className="min-h-screen bg-dark-bg flex flex-col">
@@ -71,18 +116,18 @@ export default function Lab01() {
                         <div className="mb-5">
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="font-mono text-xs text-gray-600 bg-dark-card border border-dark-border px-2 py-1 rounded-full">
-                                    Lab 01
+                                    Lab 02
                                 </span>
                                 <span className="font-mono text-xs text-neon-amber/70 bg-neon-amber/10 border border-neon-amber/20 px-2 py-1 rounded-full">
-                                    Beginner · 100 pts
+                                    Intermediate · 150 pts
                                 </span>
                             </div>
-                            <h1 className="font-mono font-black text-2xl text-white">El-Taqassi</h1>
+                            <h1 className="font-mono font-black text-2xl text-white">El-Tafteesh</h1>
                             <p className="font-mono text-xs text-neon-amber mt-0.5">
-                                Passive Reconnaissance &amp; Google Dorking
+                                Active Port Scanning with Nmap
                             </p>
                             <p className="font-cairo text-xs text-gray-500 italic mt-1">
-                                (يعني تجسس بالشرع وبدون ما حد يحس بيك 🕵️)
+                                (يعني تطق على كل باب وتشوف مين بيفتح 🔭)
                             </p>
                         </div>
 
@@ -109,7 +154,7 @@ export default function Lab01() {
                                 >
                                     <Trophy size={14} className="text-neon-amber" />
                                     <span className="font-mono text-xs text-neon-amber font-bold">
-                                        Lab Complete! مبروك يا وحش 🎉
+                                        Lab Complete! مبروك يا نقيب 🎉
                                     </span>
                                 </motion.div>
                             )}
@@ -154,14 +199,9 @@ export default function Lab01() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
-                                                    {/* Tool badge */}
-                                                    <span
-                                                        className={`font-mono text-xs px-1.5 py-0.5 rounded-full ${step.tool === 'terminal'
-                                                            ? 'text-neon-green/70 bg-neon-green/10'
-                                                            : 'text-blue-400/70 bg-blue-400/10'
-                                                            }`}
-                                                    >
-                                                        {step.tool === 'terminal' ? '💻 Terminal' : '🔍 Zoogle'}
+                                                    {/* Tool badge — always terminal */}
+                                                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-neon-green/70 bg-neon-green/10">
+                                                        💻 Terminal
                                                     </span>
                                                 </div>
 
@@ -183,7 +223,10 @@ export default function Lab01() {
                                                             title="Review this step"
                                                         >
                                                             <RotateCcw size={11} />
-                                                            {reviewingStepId === step.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                                                            {reviewingStepId === step.id
+                                                                ? <ChevronUp size={11} />
+                                                                : <ChevronDown size={11} />
+                                                            }
                                                         </button>
                                                     )}
                                                 </div>
@@ -205,12 +248,7 @@ export default function Lab01() {
                                                             <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
                                                                 <span className="font-mono text-xs text-neon-amber/60">
                                                                     💡 Type in the{' '}
-                                                                    <span
-                                                                        className="text-neon-amber underline cursor-pointer"
-                                                                        onClick={() => switchToTool(step.tool)}
-                                                                    >
-                                                                        {step.tool === 'terminal' ? 'Terminal' : step.tool === 'linkedin' ? 'LinkedIn' : 'Zoogle'}
-                                                                    </span>:
+                                                                    <span className="text-neon-amber">Terminal</span>:
                                                                 </span>
                                                                 <code className="block font-mono text-sm text-neon-green mt-1 break-all">
                                                                     {step.hint}
@@ -221,21 +259,11 @@ export default function Lab01() {
                                                             <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">
                                                                 {step.quipAr}
                                                             </p>
-
-                                                            {/* Switch tab button */}
-                                                            {step.tool !== activeTab && (
-                                                                <button
-                                                                    onClick={() => switchToTool(step.tool)}
-                                                                    className="mt-2 w-full font-mono text-xs bg-neon-amber/10 border border-neon-amber/30 text-neon-amber py-1.5 rounded-lg hover:bg-neon-amber/20 transition-all"
-                                                                >
-                                                                    Switch to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
-                                                                </button>
-                                                            )}
                                                         </motion.div>
                                                     )}
                                                 </AnimatePresence>
 
-                                                {/* ── Review panel for completed steps ── */}
+                                                {/* Review panel for completed steps */}
                                                 <AnimatePresence>
                                                     {isDone && reviewingStepId === step.id && (
                                                         <motion.div
@@ -257,15 +285,6 @@ export default function Lab01() {
                                                                 <p className="font-cairo text-xs text-neon-green/50 italic">
                                                                     {step.quipAr}
                                                                 </p>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        switchToTool(step.tool)
-                                                                        setReviewingStepId(null)
-                                                                    }}
-                                                                    className="w-full font-mono text-xs bg-neon-green/5 border border-neon-green/20 text-neon-green/60 py-1.5 rounded-lg hover:bg-neon-green/10 transition-all"
-                                                                >
-                                                                    Go to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
-                                                                </button>
                                                             </div>
                                                         </motion.div>
                                                     )}
@@ -281,6 +300,16 @@ export default function Lab01() {
                             })}
                         </div>
 
+                        {/* Reset */}
+                        <div className="mt-4">
+                            <button
+                                onClick={resetProgress}
+                                className="w-full font-mono text-xs text-gray-600 hover:text-neon-amber border border-dark-border hover:border-neon-amber/30 rounded-lg py-2 transition-all"
+                            >
+                                ↺ Reset Lab Progress
+                            </button>
+                        </div>
+
                         {/* Concept recap */}
                         <div className="mt-5 border-t border-dark-border pt-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -291,11 +320,12 @@ export default function Lab01() {
                             </div>
                             <div className="space-y-1">
                                 {[
-                                    'OSINT — passive intel with no footprint',
-                                    'WHOIS — domain ownership records',
-                                    'DNS — resolving names to IPs',
-                                    'HTTP Headers — tech stack fingerprinting',
-                                    'Google Dorks — advanced search operators',
+                                    'Nmap — the go-to port scanning tool',
+                                    '-sV — version detection for CVE hunting',
+                                    '-p — targeted scans for speed & stealth',
+                                    '-O — OS fingerprinting via TCP/IP stack',
+                                    '-A — aggressive full-scan (loud!)',
+                                    'open / closed / filtered — port states',
                                 ].map((concept) => (
                                     <div key={concept} className="flex items-start gap-2">
                                         <Zap size={10} className="text-neon-amber/50 mt-1 flex-shrink-0" />
@@ -307,27 +337,17 @@ export default function Lab01() {
                     </div>
                 </aside>
 
-                {/* ── Right: Simulators ──────────────────────────────────── */}
+                {/* ── Right: Nmap Terminal ─────────────────────────────────── */}
                 <div className="flex-1 flex flex-col min-h-0">
-                    {/* Tabs */}
+                    {/* Tab bar — single tab, mirrors Lab 01 style */}
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
-                        {[
-                            { id: 'terminal' as ActiveTab, label: '💻 Terminal', steps: '1–4' },
-                            { id: 'linkedin' as ActiveTab, label: '🔎 LinkedIn', steps: '5' },
-                            { id: 'zoogle' as ActiveTab, label: '🔍 Zoogle', steps: '6–9' },
-                        ].map(({ id, label, steps: s }) => (
-                            <button
-                                key={id}
-                                onClick={() => setActiveTab(id)}
-                                className={`flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 transition-all duration-200 ${activeTab === id
-                                    ? 'border-neon-amber text-neon-amber bg-neon-amber/5'
-                                    : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'
-                                    }`}
-                            >
-                                {label}
-                                <span className="text-xs opacity-50">steps {s}</span>
-                            </button>
-                        ))}
+                        <div
+                            className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5"
+                        >
+                            <Terminal size={14} />
+                            💻 Terminal
+                            <span className="text-xs opacity-50">steps 1–5</span>
+                        </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">
                                 {completedCount}/{totalSteps} done
@@ -338,75 +358,32 @@ export default function Lab01() {
                         </div>
                     </div>
 
-                    {/* Tab Content */}
+                    {/* Terminal panel */}
                     <div className="flex-1 overflow-hidden p-5">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'terminal' && (
-                                <motion.div
-                                    key="terminal"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <TerminalSimulator
-                                        currentStepId={currentStepId}
-                                        onCommandRun={(cmd) => {
-                                            const map: Record<string, number> = {
-                                                whoami: 1,
-                                                'whois evilcorp.com': 2,
-                                                'nslookup evilcorp.com': 3,
-                                                'curl -i evilcorp.com': 4,
-                                                'curl -I evilcorp.com': 4,
-                                                'curl --head evilcorp.com': 4,
-                                            }
-                                            const stepId = map[cmd.trim().toLowerCase()]
-                                            if (stepId) completeStep(stepId)
-                                        }}
-                                    />
-                                </motion.div>
-                            )}
-                            {activeTab === 'linkedin' && (
-                                <motion.div
-                                    key="linkedin"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <FakeLinkedIn onPetNameFound={() => completeStep(5)} />
-                                </motion.div>
-                            )}
-                            {activeTab === 'zoogle' && (
-                                <motion.div
-                                    key="zoogle"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <ZoogleSearch
-                                        currentStepId={currentStepId}
-                                        onSearchRun={(query) => {
-                                            const q = query.trim().toLowerCase()
-                                            if (q.includes('site:evilcorp.com') && q.includes('inurl:admin')) {
-                                                completeStep(8)
-                                            } else if (q.includes('site:evilcorp.com')) {
-                                                completeStep(7)
-                                            } else if (q.includes('admin') || q.includes('login')) {
-                                                completeStep(6)
-                                            }
-                                        }}
-                                        onFlagCaptured={() => completeStep(9)}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="h-full"
+                        >
+                            <NmapTerminal
+                                currentStepId={currentStepId}
+                                onCommandRun={handleCommandRun}
+                            />
+                        </motion.div>
                     </div>
                 </div>
             </main>
 
             <Footer />
+
+            {/* Completion celebration */}
+            <LabCompletionCelebration
+                isOpen={showCelebration}
+                labTitle="El-Tafteesh"
+                labNumber="02"
+                points={150}
+                onClose={() => setShowCelebration(false)}
+            />
 
             {/* Floating smart assistant */}
             <FloatingAssistant

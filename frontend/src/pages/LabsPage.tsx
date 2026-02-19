@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -10,25 +10,11 @@ import Footer from '../components/Footer'
 import MatrixBackground from '../components/MatrixBackground'
 import { LAB_REGISTRY, TOTAL_POINTS } from '../labs/registry'
 import type { LabMeta } from '../labs/types'
+import { useProgress } from '../context/ProgressContext'
+import { useAuth } from '../context/AuthContext'
 
-// ── Per-lab progress reader ──────────────────────────────────────────────────
-// Each lab can export its own progress reader. We check a known set of storage keys.
-const PROGRESS_KEYS: Record<string, string> = {
-    lab01: 'cybermasry_lab01_progress',
-}
-
-function readLabProgress(slug: string): { completed: number; total: number; pct: number } {
-    const key = PROGRESS_KEYS[slug]
-    if (!key) return { completed: 0, total: 0, pct: 0 }
-    try {
-        const raw = localStorage.getItem(key)
-        const ids: number[] = raw ? JSON.parse(raw) : []
-        // We know lab01 has 9 steps; in future labs, meta could carry stepCount
-        const total = 9
-        return { completed: ids.length, total, pct: Math.round((ids.length / total) * 100) }
-    } catch {
-        return { completed: 0, total: 9, pct: 0 }
-    }
+const LAB_TOTAL_STEPS: Record<string, number> = {
+    lab01: 9, lab02: 10, lab03: 10, lab04: 10, lab05: 10,
 }
 
 // ── Difficulty color helper ──────────────────────────────────────────────────
@@ -41,18 +27,22 @@ function difficultyStyle(d: LabMeta['difficulty']) {
 // ── Lab Card ─────────────────────────────────────────────────────────────────
 function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
     const navigate = useNavigate()
-    const [progress, setProgress] = useState({ completed: 0, total: 0, pct: 0 })
+    const { getCompletedSteps, isLabUnlocked } = useProgress()
+    const { user } = useAuth()
 
-    useEffect(() => {
-        setProgress(readLabProgress(lab.slug))
-        // refresh on storage change (e.g. student navigated back from lab)
-        const onStorage = () => setProgress(readLabProgress(lab.slug))
-        window.addEventListener('storage', onStorage)
-        return () => window.removeEventListener('storage', onStorage)
-    }, [lab.slug])
+    const labNumber = parseInt(lab.number, 10)
+    const totalSteps = LAB_TOTAL_STEPS[lab.slug] ?? 10
+    const completedArr = getCompletedSteps(labNumber)
+    const completed = completedArr.length
+    const pct = totalSteps > 0 ? Math.round((completed / totalSteps) * 100) : 0
+    const progress = { completed, total: totalSteps, pct }
 
-    const isDone = progress.pct === 100
-    const hasStarted = progress.completed > 0 && !isDone
+    // Dynamically locked: lab > 1 needs previous complete AND user logged in
+    const dynamicallyLocked = labNumber > 1 && !isLabUnlocked(labNumber)
+    const effectiveLocked = lab.locked || dynamicallyLocked
+
+    const isDone = pct === 100
+    const hasStarted = completed > 0 && !isDone
 
     return (
         <motion.div
@@ -60,16 +50,16 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ delay: index * 0.08, duration: 0.5 }}
-            whileHover={!lab.locked ? { y: -4, scale: 1.01 } : {}}
-            onClick={() => !lab.locked && navigate(`/lab/${lab.slug}`)}
-            className={`group relative rounded-2xl border bg-dark-card overflow-hidden transition-all duration-300 ${lab.locked
-                    ? 'border-dark-border opacity-55 cursor-not-allowed'
-                    : isDone
-                        ? 'border-neon-green/40 cursor-pointer hover:border-neon-green/70'
-                        : hasStarted
-                            ? 'border-neon-amber/40 cursor-pointer hover:border-neon-amber/70'
-                            : 'border-dark-border/80 cursor-pointer hover:border-neon-amber/40'
-                }`}
+            whileHover={!effectiveLocked ? { y: -4, scale: 1.01 } : {}}
+            onClick={() => !effectiveLocked && navigate(`/lab/${lab.slug}`)}
+            className={`group relative rounded-2xl border bg-dark-card overflow-hidden transition-all duration-300 ${effectiveLocked
+                ? 'border-dark-border opacity-60 cursor-not-allowed'
+                : isDone
+                    ? 'border-neon-green/40 cursor-pointer hover:border-neon-green/70'
+                    : hasStarted
+                        ? 'border-neon-amber/40 cursor-pointer hover:border-neon-amber/70'
+                        : 'border-dark-border/80 cursor-pointer hover:border-neon-amber/40'
+                }}`}
             style={
                 isDone
                     ? { boxShadow: '0 0 20px rgba(0,255,65,0.07)' }
@@ -85,7 +75,18 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
 
             {/* In-progress bar top */}
             {hasStarted && !isDone && (
-                <div className="absolute top-0 left-0 h-0.5 bg-neon-amber/70" style={{ width: `${progress.pct}%` }} />
+                <div className="absolute top-0 left-0 h-0.5 bg-neon-amber/70" style={{ width: `${pct}%` }} />
+            )}
+
+            {/* Dynamic lock overlay tooltip */}
+            {dynamicallyLocked && !lab.locked && (
+                <div className="absolute inset-0 bg-dark-bg/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
+                    <div className="text-center">
+                        <div className="text-3xl mb-1">🔒</div>
+                        <p className="font-cairo text-xs text-gray-500">{user ? 'أكمل اللاب اللي قبله الأول' : 'سجّل دخولك عشان تفتح الـ labs'}</p>
+                        {!user && <p className="font-mono text-xs text-neon-amber mt-1 underline cursor-pointer" onClick={e => { e.stopPropagation(); navigate('/login') }}>Login →</p>}
+                    </div>
+                </div>
             )}
 
             <div className="p-6">
@@ -94,7 +95,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                     <motion.div
                         whileHover={{ rotate: [0, -10, 10, 0] }}
                         transition={{ duration: 0.4 }}
-                        className={`text-5xl flex-shrink-0 select-none ${lab.locked ? 'grayscale opacity-40' : ''}`}
+                        className={`text-5xl flex-shrink-0 select-none ${effectiveLocked ? 'grayscale opacity-40' : ''}`}
                     >
                         {isDone ? '🏆' : lab.icon}
                     </motion.div>
@@ -133,15 +134,15 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                                 </motion.span>
                             )}
 
-                            {lab.locked && (
+                            {effectiveLocked && (
                                 <span className="font-mono text-xs text-gray-600 flex items-center gap-1">
-                                    <Lock size={10} /> Locked
+                                    <Lock size={10} /> {dynamicallyLocked && !lab.locked ? 'Complete prev lab' : 'Locked'}
                                 </span>
                             )}
                         </div>
 
                         {/* Title + subtitle */}
-                        <h2 className={`font-mono text-xl font-black mb-0.5 transition-colors ${lab.locked ? 'text-gray-600' : isDone ? 'text-neon-green' : 'text-white group-hover:text-neon-amber'
+                        <h2 className={`font-mono text-xl font-black mb-0.5 transition-colors ${effectiveLocked ? 'text-gray-600' : isDone ? 'text-neon-green' : 'text-white group-hover:text-neon-amber'
                             }`}>
                             {lab.titleEn}
                         </h2>
@@ -158,21 +159,21 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                         </div>
 
                         {/* Progress */}
-                        {!lab.locked && progress.total > 0 && (
+                        {!effectiveLocked && (
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="font-mono text-xs text-gray-600">
-                                        {isDone ? 'All steps done 🎉' : hasStarted ? `${progress.completed}/${progress.total} steps` : 'Not started yet'}
+                                        {isDone ? 'All steps done 🎉' : hasStarted ? `${completed}/${totalSteps} steps` : 'Not started yet'}
                                     </span>
                                     <span className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green' : 'text-neon-amber/70'}`}>
-                                        {progress.pct}%
+                                        {pct}%
                                     </span>
                                 </div>
                                 <div className="h-1.5 bg-dark-border rounded-full overflow-hidden">
                                     <motion.div
                                         className={`h-full rounded-full ${isDone ? 'bg-neon-green' : 'bg-neon-amber'}`}
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${progress.pct}%` }}
+                                        animate={{ width: `${pct}%` }}
                                         transition={{ duration: 0.8, ease: 'easeOut', delay: index * 0.1 + 0.3 }}
                                     />
                                 </div>
@@ -180,7 +181,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                         )}
 
                         {/* CTA */}
-                        {!lab.locked && (
+                        {!effectiveLocked && (
                             <div className={`mt-4 flex items-center gap-2 font-mono text-sm font-bold transition-colors ${isDone ? 'text-neon-green/70' : 'text-neon-amber/70 group-hover:text-neon-amber'
                                 }`}>
                                 {isDone ? (
@@ -201,7 +202,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                     </div>
 
                     {/* Right arrow */}
-                    {!lab.locked && (
+                    {!effectiveLocked && (
                         <div className="flex-shrink-0 self-center">
                             <motion.div
                                 animate={{ x: [0, 4, 0] }}
@@ -219,20 +220,10 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
 
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 function StatsBar() {
-    const [totalPct, setTotalPct] = useState(0)
-    const [earnedPts, setEarnedPts] = useState(0)
-
-    useEffect(() => {
-        let completedLabs = 0
-        let earned = 0
-        for (const lab of LAB_REGISTRY) {
-            const p = readLabProgress(lab.slug)
-            if (p.pct === 100) { completedLabs++; earned += lab.points }
-        }
-        const pct = LAB_REGISTRY.length > 0 ? Math.round((completedLabs / LAB_REGISTRY.length) * 100) : 0
-        setTotalPct(pct)
-        setEarnedPts(earned)
-    }, [])
+    const { completedLabs, totalScore, getCompletedSteps } = useProgress()
+    const completedCount = completedLabs.length
+    const totalPct = LAB_REGISTRY.length > 0 ? Math.round((completedCount / LAB_REGISTRY.length) * 100) : 0
+    const earnedPts = totalScore
 
     const stats = [
         { icon: <BarChart2 size={16} />, value: `${LAB_REGISTRY.filter(l => !l.locked).length}`, label: 'Available Labs' },
@@ -280,12 +271,17 @@ function StatsBar() {
 export default function LabsPage() {
     const [filter, setFilter] = useState<'all' | 'available' | 'completed' | 'in-progress'>('all')
 
+    const { isLabUnlocked, getCompletedSteps, isLabComplete } = useProgress()
+
     const filtered = LAB_REGISTRY.filter((lab) => {
         if (filter === 'all') return true
-        if (filter === 'available') return !lab.locked
-        const p = readLabProgress(lab.slug)
-        if (filter === 'completed') return p.pct === 100
-        if (filter === 'in-progress') return p.completed > 0 && p.pct < 100
+        const labNumber = parseInt(lab.number, 10)
+        if (filter === 'available') return !lab.locked && isLabUnlocked(labNumber)
+        if (filter === 'completed') return isLabComplete(labNumber)
+        if (filter === 'in-progress') {
+            const steps = getCompletedSteps(labNumber)
+            return steps.length > 0 && !isLabComplete(labNumber)
+        }
         return true
     })
 
@@ -341,8 +337,8 @@ export default function LabsPage() {
                                 key={id}
                                 onClick={() => setFilter(id)}
                                 className={`font-mono text-xs px-4 py-2 rounded-full border transition-all duration-200 ${filter === id
-                                        ? 'bg-neon-amber text-black border-neon-amber font-bold'
-                                        : 'bg-dark-card border-dark-border text-gray-400 hover:border-neon-amber/40 hover:text-gray-200'
+                                    ? 'bg-neon-amber text-black border-neon-amber font-bold'
+                                    : 'bg-dark-card border-dark-border text-gray-400 hover:border-neon-amber/40 hover:text-gray-200'
                                     }`}
                             >
                                 {label}

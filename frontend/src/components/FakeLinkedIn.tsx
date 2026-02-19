@@ -280,8 +280,8 @@ export default function FakeLinkedIn({ onPetNameFound }: Props) {
                                         onChange={(e) => setInputVal(e.target.value)}
                                         placeholder="Type the pet's name…"
                                         className={`w-full bg-dark-bg border rounded-lg pl-8 pr-3 py-2.5 font-mono text-sm placeholder:text-gray-700 focus:outline-none transition-colors ${wrong
-                                                ? 'border-red-500/60 text-red-400'
-                                                : 'border-dark-border text-gray-200 focus:border-neon-amber/50'
+                                            ? 'border-red-500/60 text-red-400'
+                                            : 'border-dark-border text-gray-200 focus:border-neon-amber/50'
                                             }`}
                                     />
                                 </div>

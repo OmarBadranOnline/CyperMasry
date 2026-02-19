@@ -5,11 +5,12 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import MatrixBackground from '../components/MatrixBackground'
 import { LAB_REGISTRY, TOTAL_POINTS } from '../labs/registry'
-
+import { useAuth } from '../context/AuthContext'
 
 
 export default function LandingPage() {
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     return (
         <div className="min-h-screen bg-dark-bg relative">
@@ -80,7 +81,7 @@ export default function LandingPage() {
                     transition={{ duration: 0.5, delay: 0.35, type: 'spring', stiffness: 200 }}
                     whileHover={{ scale: 1.06, y: -4 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/lab/${LAB_REGISTRY[0]?.slug ?? 'lab01'}`)}
+                    onClick={() => navigate(user ? '/labs' : '/login')}
                     className="group relative overflow-hidden bg-neon-amber text-black font-mono font-black text-xl md:text-2xl px-10 py-5 rounded-2xl transition-all duration-300 mb-3"
                     style={{ boxShadow: '0 0 30px rgba(255, 191, 0, 0.4)' }}
                 >
