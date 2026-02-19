@@ -1,0 +1,4 @@
+/* Netlify redirects — required for React Router client-side routing.
+   Any path that doesn't match a real file gets served index.html,
+   and React Router takes it from there. */
+/*    /index.html   200
