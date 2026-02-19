@@ -16,13 +16,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Lab, Solve, LabProgress
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']  = 'sqlite:///cybermasry.db'
+
+# Database Config (Supports Render/Railway/Fly)
+database_uri = os.environ.get('DATABASE_URL', 'sqlite:///cybermasry.db')
+# Fix for Render using old 'postgres://' scheme
+if database_uri.startswith("postgres://"):
+    database_uri = database_uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI']  = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'cyber-masry-secret-key-2025-IT102')
 app.config['JWT_EXP_HOURS'] = 72   # tokens last 3 days
 
-CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173',
-                   'https://cyber-masry.netlify.app'])
+# CORS Config (Add production frontend URL via env var)
+frontend_url = os.environ.get('FRONTEND_URL')
+origins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174']
+if frontend_url:
+    origins.append(frontend_url)
+
+CORS(app, origins=origins)
 db.init_app(app)
 
 

@@ -4,7 +4,7 @@
  */
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 
-const API = 'http://localhost:5000'
+import { API_URL as API } from '../config'
 
 export interface AuthUser {
     id: number

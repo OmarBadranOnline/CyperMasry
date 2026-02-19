@@ -7,7 +7,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { useAuth } from './AuthContext'
 
-const API = 'http://localhost:5000'
+import { API_URL as API } from '../config'
 
 // Total steps per lab (must match useMissionProgress in each lab folder)
 const LAB_TOTAL_STEPS: Record<number, number> = {

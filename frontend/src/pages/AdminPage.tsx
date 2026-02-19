@@ -15,7 +15,7 @@ import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
-const API = 'http://localhost:5000'
+import { API_URL as API } from '../config'
 
 interface AdminUser {
     id: number; username: string; student_id: string; email: string
