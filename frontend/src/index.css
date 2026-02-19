@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Global Reset ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #e5e5e5;
+  font-family: 'Cairo', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ─── Code / Monospace ─── */
+code, pre, .font-mono, [data-lang="en"] {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* ─── Arabic Text ─── */
+[lang="ar"], .font-cairo {
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+/* ─── Neon Glow Effects ─── */
+.neon-text-amber {
+  color: #FFBF00;
+  text-shadow: 0 0 10px rgba(255, 191, 0, 0.8), 0 0 20px rgba(255, 191, 0, 0.4);
+}
+
+.neon-text-orange {
+  color: #FF8C00;
+  text-shadow: 0 0 10px rgba(255, 140, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.4);
+}
+
+.neon-text-green {
+  color: #00ff41;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.8), 0 0 20px rgba(0, 255, 65, 0.4);
+}
+
+.neon-border-amber {
+  border-color: #FFBF00;
+  box-shadow: 0 0 8px rgba(255, 191, 0, 0.4), inset 0 0 8px rgba(255, 191, 0, 0.05);
+}
+
+.neon-border-orange {
+  border-color: #FF8C00;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4), inset 0 0 8px rgba(255, 140, 0, 0.05);
+}
+
+/* ─── Terminal Cursor ─── */
+.terminal-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background-color: #00ff41;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+  box-shadow: 0 0 6px #00ff41;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ─── Scrollbar Styling ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #FFBF00;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF8C00;
+}
+
+/* ─── Button hover bounce ─── */
+.btn-bounce {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-bounce:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 8px 25px rgba(255, 191, 0, 0.5);
+}
+.btn-bounce:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ─── Matrix Rain Background ─── */
+.matrix-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  opacity: 0.04;
+}
+
+/* ─── Card Styles ─── */
+.cyber-card {
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.cyber-card:hover {
+  border-color: #FFBF00;
+  box-shadow: 0 0 20px rgba(255, 191, 0, 0.15);
+}
+
+/* ─── Terminal Styles ─── */
+.terminal-window {
+  background: #0d0d0d;
+  border: 1px solid #1f1f1f;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.terminal-header {
+  background: #1a1a1a;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a2a2a;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.terminal-body {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+/* ─── Tip Box ─── */
+.tip-box {
+  background: rgba(255, 191, 0, 0.06);
+  border-left: 3px solid #FFBF00;
+  border-radius: 0 6px 6px 0;
+  padding: 8px 12px;
+  margin-top: 6px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  color: #c9a227;
+  direction: rtl;
+  text-align: right;
+}
+
+/* ─── Zoogle Search ─── */
+.zoogle-result {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.zoogle-result:hover {
+  border-color: #FFBF00;
+}
+.zoogle-link {
+  color: #00ff41;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
