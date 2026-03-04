@@ -17,7 +17,7 @@ export default function Lab04() {
     const navigate = useNavigate()
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
     const [showCelebration, setShowCelebration] = useState(false)
-    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress()
+    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress('lab04')
 
     const totalSteps = steps.length
     const progressPct = Math.round((completedCount / totalSteps) * 100)
@@ -45,7 +45,28 @@ export default function Lab04() {
         // Step 9: LOAD_FILE
         if (c.includes('load_file') && !steps[8].completed) { completeStep(9); return }
         // Step 10: INTO OUTFILE web shell
-        if (c.includes('into outfile') && c.includes('shell.php') && !steps[9].completed) { completeStep(10); setShowCelebration(true) }
+        if (c.includes('into outfile') && c.includes('shell.php') && !steps[9].completed) { completeStep(10); return }
+
+        // Step 11: Sleep Injection
+        if (c.includes('sleep') && !steps[10].completed) { completeStep(11); return }
+
+        // Step 12: Binary Search DB
+        if ((c.includes('ascii') || c.includes('substring')) && c.includes('sleep') && !steps[11].completed) { completeStep(12); return }
+
+        // Step 13: Password Recovered
+        if (c.startsWith('submit_flag') && c.includes('5c3r3tp4ss') && !steps[12].completed) { completeStep(13); return }
+
+        // Step 14: Account Profile Injection
+        if (c.startsWith('update_profile') && c.includes("admin'--") && !steps[13].completed) { completeStep(14); return }
+
+        // Step 15: Wait for Admin
+        if (c.startsWith('wait') && !steps[14].completed) { completeStep(15); return }
+
+        // Step 16: Extract Delayed Payload
+        if (c.startsWith('submit_flag') && c.includes('2nd_order_win') && !steps[15].completed) {
+            completeStep(16)
+            setShowCelebration(true)
+        }
     }
 
     return (
@@ -169,7 +190,7 @@ export default function Lab04() {
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         <div className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5">
                             <Terminal size={14} />💉 SQLi Terminal
-                            <span className="text-xs opacity-50">10 steps</span>
+                            <span className="text-xs opacity-50">16 steps</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">{completedCount}/{totalSteps} done</span>
@@ -185,7 +206,7 @@ export default function Lab04() {
             </main>
             <Footer />
             <LabCompletionCelebration isOpen={showCelebration} labTitle="El-Ekhteraq" labNumber="04" points={200} onClose={() => setShowCelebration(false)} />
-            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} labId={4} />
+            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} />
         </div>
     )
 }

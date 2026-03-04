@@ -104,6 +104,50 @@ const INITIAL_STEPS: MissionStep[] = [
         quipAr: 'الـ pentester المحترف بيحفظ كل حاجة — التقرير جزء من الشغل يا بطل 📋',
         completed: false,
     },
+    // --- Extra 1: Deep APIs ---
+    {
+        id: 11, tool: 'terminal', title: 'Extra: Fuzz API versions',
+        objective: 'Fuzz for hidden API endpoints using Gobuster dir mode.',
+        hint: 'gobuster dir -u http://192.168.1.5/api/ -w /usr/share/wordlists/api.txt',
+        quipAr: 'خلينا ندور على مسارات الـ API المخفية. 🔌',
+        completed: false,
+    },
+    {
+        id: 12, tool: 'terminal', title: 'Extra: Check /v2/ leaked data',
+        objective: 'Enumerate API version paths.',
+        hint: 'curl http://192.168.1.5/api/v2/users',
+        quipAr: 'احياناً بيكون في مسار /v2/ فيه تسريب معلومات. 🔍',
+        completed: false,
+    },
+    {
+        id: 13, tool: 'terminal', title: 'Extra: Extract JSON payload',
+        objective: 'Capture the exposed JSON data.',
+        hint: 'curl http://192.168.1.5/api/v2/users | jq',
+        quipAr: 'افحص استجابة الخادم للملفات. 📄',
+        completed: false,
+    },
+    // --- Extra 2: Virtual Hosts ---
+    {
+        id: 14, tool: 'terminal', title: 'Extra: VHost Fuzzing',
+        objective: 'Run gobuster vhost against the current IP.',
+        hint: 'gobuster vhost -u http://192.168.1.5 -w /usr/share/wordlists/subdomains.txt',
+        quipAr: 'استخدم gobuster vhost لاكتشاف المواقع الموازية على نفس الاي بي. 🌐',
+        completed: false,
+    },
+    {
+        id: 15, tool: 'terminal', title: 'Extra: Target VHost',
+        objective: 'Found internal development subdomain.',
+        hint: 'curl -H "Host: dev.evilcorp.local" http://192.168.1.5',
+        quipAr: 'بص على الدومين الداخلي dev.evilcorp.local! 🏢',
+        completed: false,
+    },
+    {
+        id: 16, tool: 'terminal', title: 'Extra: Access Platform Flag',
+        objective: 'Access the VHost platform.',
+        hint: 'submit_flag vhost_dev',
+        quipAr: 'هنا الـ Flag الحقيقي. 🎯',
+        completed: false,
+    },
 ]
 
 function loadProgress(): MissionStep[] {
@@ -122,7 +166,7 @@ function saveProgress(steps: MissionStep[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completedIds))
 }
 
-export function useMissionProgress() {
+export function useMissionProgress(labId: string) {
     const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
@@ -135,11 +179,13 @@ export function useMissionProgress() {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
             if (next !== prev) {
                 saveProgress(next)
-                saveStep(3, stepId)
+                const completedCnt = next.filter((s) => s.completed).length
+                const isFinal = completedCnt === next.length
+                saveStep(labId, stepId, 175, isFinal)
             }
             return next
         })
-    }, [])
+    }, [labId, saveStep])
 
     const resetProgress = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY)

@@ -29,7 +29,7 @@ const PROMPT = `${HOSTNAME}:${CWD}$`
 
 const ALL_COMMANDS = [
     'help', 'whoami', 'pwd', 'ls', 'cat', 'whois', 'nslookup', 'ping', 'curl', 'history', 'clear',
-    'ifconfig', 'ip', 'netstat', 'traceroute', 'dig',
+    'ifconfig', 'ip', 'netstat', 'traceroute', 'dig', 'theharvester', 'hash-identifier', 'submit_flag'
 ]
 
 // ─── Guided hints per step ────────────────────────────────────────────────────
@@ -38,6 +38,13 @@ const STEP_HINTS: Record<number, string> = {
     2: 'whois evilcorp.com',
     3: 'nslookup evilcorp.com',
     4: 'curl -I evilcorp.com',
+    10: 'dig evilcorp.com any',
+    11: 'curl https://blacklist-check.api/evilcorp.com',
+    13: 'curl dev.evilcorp.com/flag',
+    14: 'theharvester -d evilcorp.com -b all',
+    15: 'curl haveibeenpwned.com/api/v3/breachedaccount/admin@evilcorp.com',
+    16: 'hash-identifier 5f4dcc3b5aa765d61d8327deb882cf99',
+    17: 'submit_flag intel_complete',
 }
 
 // ─── Command definitions ──────────────────────────────────────────────────────
@@ -59,10 +66,13 @@ const COMMANDS: Record<string, (args: string[]) => CommandOutput> = {
             '  nslookup <domain>     DNS A/MX record lookup',
             '  dig <domain>          Detailed DNS enumeration',
             '  ping <host>           ICMP reachability check',
-            '  curl -I <url>         Fetch HTTP response headers',
+            '  curl <url>            Transfer a URL (try -I for headers)',
             '  traceroute <host>     Trace network path to host',
             '  netstat -tuln         Active network connections',
             '  ip addr               Show network interfaces',
+            '  theharvester          Email and subdomain scraper',
+            '  hash-identifier       Identify hash types',
+            '  submit_flag <flag>    Submit discovered flags',
             '  history               Show command history',
             '  clear                 Clear terminal',
             '',
@@ -348,6 +358,135 @@ const COMMANDS: Record<string, (args: string[]) => CommandOutput> = {
         tipAr: 'ifconfig قديمة.. بس لسه شغالة وكتير من المقابلات بتسألها 👴',
     }),
 
+    curl: (args) => {
+        const fullArgs = args.join(' ')
+        if (fullArgs.includes('blacklist-check.api')) {
+            return {
+                lines: [
+                    '[{"ip": "203.0.113.42", "blacklist": "Spamhaus ZEN", "status": "LISTED"}, {"ip": "203.0.113.42", "blacklist": "Barracuda BRBL", "status": "CLEAN"}]',
+                    '',
+                    '[!] Target IP is listed on Spamhaus ZEN.'
+                ],
+                tipEn: 'Checking threat intel blacklists helps determine if the web server is already compromised or has a poor reputation.',
+                tipAr: 'لو كان في البلاك ليست، ممكن يكون السيرفر ده بيتلعب فيه من بدري 🚯'
+            }
+        }
+        if (fullArgs.includes('dev.evilcorp.com/flag')) {
+            return {
+                lines: [
+                    '{ "status": "200 OK", "flag": "flag{d3v_3nv_3xp0s3d_2025}" }'
+                ],
+                tipEn: 'Development subdomains often leak sensitive data or flags because they lack the security hardening of production systems.',
+                tipAr: 'بيئة التطوير دايماً مليانة مشاكل أمنية سهلة.. مبيأمنوهاش زي الأساسي 🛠️'
+            }
+        }
+        if (fullArgs.includes('haveibeenpwned.com')) {
+            return {
+                lines: [
+                    '[{"Name": "LinkedIn", "Domain": "linkedin.com", "BreachDate": "2012-05-05", "PwnCount": 164611595, "DataClasses": ["Email addresses", "Passwords"]}]',
+                    '',
+                    '[!] Found breach data for admin@evilcorp.com!'
+                ],
+                tipEn: 'Cross-referencing leaked emails with data breaches allows attackers to perform credential stuffing or password re-use attacks.',
+                tipAr: 'نفس الباسورد في كل مكان؟ شكراً، هتتجاب من هنا 🔓'
+            }
+        }
+        if (fullArgs.includes('-I') || fullArgs.includes('-i')) {
+            return {
+                lines: [
+                    'HTTP/1.1 200 OK',
+                    'Server: Apache/2.4.41 (Ubuntu)',
+                    'X-Powered-By: PHP/7.4.3',
+                    'Set-Cookie: PHPSESSID=e1c2d3a4b5f6; path=/',
+                    'Connection: close',
+                    '',
+                    '[!] Tech stack fingerprint: Apache 2.4.41, PHP 7.4.3 (Ubuntu)'
+                ],
+                tipEn: '-I fetches only the headers. Banners like "X-Powered-By" openly reveal the technology stack, giving attackers a blueprint for exploits.',
+                tipAr: 'الـ Hedears دي كنز بصري.. السيرفر بيقولك أنا بستخدم إيه بالظبط 🧠'
+            }
+        }
+        return {
+            lines: [
+                '<!DOCTYPE html>',
+                '<html><head><title>Access Denied</title></head>',
+                '<body><h1>403 Forbidden</h1></body></html>'
+            ],
+            tipEn: 'By default curl performs a GET request and prints the response body.',
+            tipAr: 'curl بيجيب محتوى الـ HTML بتاع الصفحة، بس احنا محتاجين معلومات أدق.'
+        }
+    },
+
+    theharvester: () => ({
+        lines: [
+            '*******************************************************************',
+            '*  theHarvester 4.4.4',
+            '*  Program for gathering public emails, subdomains, and names.',
+            '*******************************************************************',
+            '[*] Target: evilcorp.com',
+            '[*] Searching Google...',
+            '[*] Searching LinkedIn...',
+            '[*] Searching Bing...',
+            '',
+            '[+] Emails found:',
+            'admin@evilcorp.com',
+            'support@evilcorp.com',
+            'karim.it@evilcorp.com',
+            '',
+            '[+] Hosts found:',
+            '203.0.113.42: www.evilcorp.com',
+            '203.0.113.43: dev.evilcorp.com',
+        ],
+        tipEn: 'theHarvester automates OSINT data collection across multiple search engines. Finding emails is critical for phishing and credential brute-forcing.',
+        tipAr: 'الحصادة دي بتلم الإيميلات والسيرفرات من الـ Google وغيره أوتوماتيك 🌾'
+    }),
+
+    'hash-identifier': (args) => {
+        const hash = args[0] || '5f4dcc3b5aa765d61d8327deb882cf99'
+        return {
+            lines: [
+                '   #########################################################################',
+                '   #     __  __                     __           ______    _____           #',
+                '   #    /\\ \\/\\ \\                   /\\ \\         /\\__  _\\  /\\  _ `\\         #',
+                '   #    \\ \\ \\_\\ \\     __      ____ \\ \\ \\___     \\/_/\\ \\/  \\ \\ \\/\\ \\        #',
+                '   #     \\ \\  _  \\  /\'__`\\   / ,__\\ \\ \\  _ `\\      \\ \\ \\   \\ \\ \\ \\ \\       #',
+                '   #      \\ \\ \\ \\ \\/\\ \\_\\ \\_/\\__, `\\ \\ \\ \\ \\ \\      \\_\\ \\__ \\ \\ \\_\\ \\      #',
+                '   #       \\ \\_\\ \\_\\ \\___ \\_\\/\\____/  \\ \\_\\ \\_\\     /\\_____\\ \\ \\____/      #',
+                '   #        \\/_/\\/_/\\/__/\\/_/\\/___/    \\/_/\\/_/     \\/_____/  \\/___/       #',
+                '   #                                                                       #',
+                '   #########################################################################',
+                '',
+                `Analyzing: ${hash}`,
+                '[+] Possible Hashs:',
+                '[+] MD5',
+                '[+] Domain Cached Credentials - MD4(MD4(($pass)).(strtolower($username)))'
+            ],
+            tipEn: 'Knowing the hash algorithm is the first step to cracking it. MD5 is extremely weak and fast to crack.',
+            tipAr: 'عشان تكسر الـ Hash لازم تعرف نوعه الأول.. الـ MD5 ده ضعيف جداً 🔨'
+        }
+    },
+
+    submit_flag: (args) => {
+        const flag = args[0]
+        if (flag) {
+            return {
+                lines: [
+                    '[=====================================================]',
+                    ` Validating flag submission: ${flag}`,
+                    '[=====================================================]',
+                    '',
+                    '[+] Success! Flag accepted. Mission objective verified.',
+                ],
+                tipEn: 'Flag submitted successfully!',
+                tipAr: 'عاش! الـ Flag صح وتم الإرسال 🏆'
+            }
+        }
+        return {
+            lines: ['Usage: submit_flag <flag_value>'],
+            isError: true
+        }
+    },
+
     history: () => ({
         lines: [
             '    1  whoami',
@@ -456,7 +595,7 @@ export default function TerminalSimulator({ currentStepId, onCommandRun }: Props
         setHistory((p) => p.map((e, i) => (i === idx ? { ...e, showTip: !e.showTip } : e)))
 
     // Current step hint (from mission tracker)
-    const stepHint = currentStepId && currentStepId <= 4 ? STEP_HINTS[currentStepId] : null
+    const stepHint = currentStepId ? STEP_HINTS[currentStepId] : null
 
     return (
         <div

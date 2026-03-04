@@ -1,8 +1,0 @@
-flask
-flask-cors
-flask-sqlalchemy
-PyJWT
-werkzeug
-gunicorn
-requests
-psycopg2-binary

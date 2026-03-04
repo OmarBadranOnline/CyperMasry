@@ -33,7 +33,7 @@ export default function Lab02() {
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
     const [showCelebration, setShowCelebration] = useState(false)
     const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } =
-        useMissionProgress()
+        useMissionProgress('lab02')
 
     const totalSteps = steps.length
     const progressPct = Math.round((completedCount / totalSteps) * 100)
@@ -74,12 +74,32 @@ export default function Lab02() {
         // Step 8: fast scan (-T4 -F)
         if (hasFlag('-t4') && hasFlag('-f') && c.includes('192.168.1.5') && !steps[7].completed) { completeStep(8); return }
 
-        // Step 9: NSE vuln scripts
-        if (c.includes('--script') && c.includes('vuln') && c.includes('192.168.1.5') && !steps[8].completed) { completeStep(9); return }
+        // Step 9 & 14: NSE vuln scripts
+        if (c.includes('--script') && c.includes('vuln') && c.includes('192.168.1.5')) {
+            if (!steps[8].completed) { completeStep(9); return }
+            if (steps[8].completed && !steps[13].completed) { completeStep(14); return }
+        }
 
         // Step 10: host discovery ping sweep
         if (hasFlag('-sn') && (c.includes('192.168.1.0') || c.includes('/24')) && !steps[9].completed) {
             completeStep(10)
+        }
+
+        // Step 11: Full UDP scan
+        if (hasFlag('-su') && c.includes('-p-') && !steps[10].completed) { completeStep(11); return }
+
+        // Step 12: SNMP Enum
+        if (hasFlag('-su') && hasFlag('-p') && c.includes('161') && c.includes('snmp-brute') && !steps[11].completed) { completeStep(12); return }
+
+        // Step 13: Capture UDP Flag
+        if (c.startsWith('curl') && c.includes('tftp://') && !steps[12].completed) { completeStep(13); return }
+
+        // Step 15: Analyze CVE
+        if (c.startsWith('searchsploit') && c.includes('cve-') && !steps[14].completed) { completeStep(15); return }
+
+        // Step 16: Submit Vuln
+        if (c.startsWith('submit_flag') && c.includes('vuln_report') && !steps[15].completed) {
+            completeStep(16)
             setShowCelebration(true)
         }
     }
@@ -346,7 +366,7 @@ export default function Lab02() {
                         >
                             <Terminal size={14} />
                             💻 Terminal
-                            <span className="text-xs opacity-50">steps 1–5</span>
+                            <span className="text-xs opacity-50">steps 1–16</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">

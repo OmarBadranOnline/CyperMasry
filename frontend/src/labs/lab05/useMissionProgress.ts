@@ -104,6 +104,50 @@ const INITIAL_STEPS: MissionStep[] = [
         quipAr: 'Nikto بيعمل scan كامل ويطلع تقرير بكل الثغرات المحتملة — الخطوة الأخيرة قبل الـ exploit 🏁',
         completed: false,
     },
+    // --- Extra 1: Timing Attacks ---
+    {
+        id: 11, tool: 'terminal', title: 'Extra: OpenSSH 7.2 Validation',
+        objective: 'Verify the OpenSSH banner version.',
+        hint: 'nc 192.168.1.5 22',
+        quipAr: 'افحص OpenSSH النسخة 7.2.. في مشكلة هنا! 🔐',
+        completed: false,
+    },
+    {
+        id: 12, tool: 'terminal', title: 'Extra: User Enum Timing',
+        objective: 'Perform the CVE-2018-15473 timing attack.',
+        hint: 'python3 ssh_enum.py 192.168.1.5',
+        quipAr: 'استخدم أداة قياس التوقيت عند تسجيل الدخول لتحديد المستخدمين. ⏱️',
+        completed: false,
+    },
+    {
+        id: 13, tool: 'terminal', title: 'Extra: Verify Username',
+        objective: 'Validate the correct username.',
+        hint: 'submit_flag "admin_user"',
+        quipAr: 'لقيت المستخدم! ادخل خد الفلاج. 🚩',
+        completed: false,
+    },
+    // --- Extra 2: Web Stack ---
+    {
+        id: 14, tool: 'terminal', title: 'Extra: WhatWeb Scan',
+        objective: 'Use WhatWeb against the target.',
+        hint: 'whatweb 192.168.1.5',
+        quipAr: 'استخدم WhatWeb عشان تجيب ملخص لكل المكونات للموقع. 🔮',
+        completed: false,
+    },
+    {
+        id: 15, tool: 'terminal', title: 'Extra: CMS Vuln Scan',
+        objective: 'Pivot to analyzing WordPress version vulnerabilities.',
+        hint: 'wpscan --url http://192.168.1.5',
+        quipAr: 'فيه نسخة WordPress قديمة! استخدم WPScan. ⚠️',
+        completed: false,
+    },
+    {
+        id: 16, tool: 'terminal', title: 'Extra: Submit Stack Vulns',
+        objective: 'Submit proof of outdated stack.',
+        hint: 'submit_flag wp_CVE_detected',
+        quipAr: 'وصلت للاستغلال المطلوب. 🎯',
+        completed: false,
+    },
 ]
 
 function loadProgress(): MissionStep[] {
@@ -122,7 +166,7 @@ function saveProgress(steps: MissionStep[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completedIds))
 }
 
-export function useMissionProgress() {
+export function useMissionProgress(labId: string) {
     const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
@@ -135,11 +179,13 @@ export function useMissionProgress() {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
             if (next !== prev) {
                 saveProgress(next)
-                saveStep(5, stepId)
+                const completedCnt = next.filter((s) => s.completed).length
+                const isFinal = completedCnt === next.length
+                saveStep(labId, stepId, 250, isFinal)
             }
             return next
         })
-    }, [])
+    }, [labId, saveStep])
 
     const resetProgress = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY)

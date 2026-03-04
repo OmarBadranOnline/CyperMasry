@@ -11,10 +11,9 @@ import MatrixBackground from '../components/MatrixBackground'
 import { LAB_REGISTRY, TOTAL_POINTS } from '../labs/registry'
 import type { LabMeta } from '../labs/types'
 import { useProgress } from '../context/ProgressContext'
-import { useAuth } from '../context/AuthContext'
 
 const LAB_TOTAL_STEPS: Record<string, number> = {
-    lab01: 9, lab02: 10, lab03: 10, lab04: 10, lab05: 10,
+    lab01: 17, lab02: 16, lab03: 16, lab04: 16, lab05: 16,
 }
 
 // ── Difficulty color helper ──────────────────────────────────────────────────
@@ -28,17 +27,17 @@ function difficultyStyle(d: LabMeta['difficulty']) {
 function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
     const navigate = useNavigate()
     const { getCompletedSteps, isLabUnlocked } = useProgress()
-    const { user } = useAuth()
 
-    const labNumber = parseInt(lab.number, 10)
-    const totalSteps = LAB_TOTAL_STEPS[lab.slug] ?? 10
-    const completedArr = getCompletedSteps(labNumber)
+    const labSlug = lab.slug
+    const totalSteps = LAB_TOTAL_STEPS[labSlug] ?? 10
+    const completedArr = getCompletedSteps(labSlug)
     const completed = completedArr.length
     const pct = totalSteps > 0 ? Math.round((completed / totalSteps) * 100) : 0
     const progress = { completed, total: totalSteps, pct }
 
-    // Dynamically locked: lab > 1 needs previous complete AND user logged in
-    const dynamicallyLocked = labNumber > 1 && !isLabUnlocked(labNumber)
+    // Dynamically locked: lab > 1 needs previous complete depending on ProgressContext rules
+    const labNumberInt = parseInt(lab.number, 10)
+    const dynamicallyLocked = labNumberInt > 1 && !isLabUnlocked(labNumberInt)
     const effectiveLocked = lab.locked || dynamicallyLocked
 
     const isDone = pct === 100
@@ -83,8 +82,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                 <div className="absolute inset-0 bg-dark-bg/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
                     <div className="text-center">
                         <div className="text-3xl mb-1">🔒</div>
-                        <p className="font-cairo text-xs text-gray-500">{user ? 'أكمل اللاب اللي قبله الأول' : 'سجّل دخولك عشان تفتح الـ labs'}</p>
-                        {!user && <p className="font-mono text-xs text-neon-amber mt-1 underline cursor-pointer" onClick={e => { e.stopPropagation(); navigate('/login') }}>Login →</p>}
+                        <p className="font-cairo text-xs text-gray-500">أكمل اللاب اللي قبله الأول</p>
                     </div>
                 </div>
             )}
@@ -275,12 +273,13 @@ export default function LabsPage() {
 
     const filtered = LAB_REGISTRY.filter((lab) => {
         if (filter === 'all') return true
+        const labSlug = lab.slug
         const labNumber = parseInt(lab.number, 10)
         if (filter === 'available') return !lab.locked && isLabUnlocked(labNumber)
-        if (filter === 'completed') return isLabComplete(labNumber)
+        if (filter === 'completed') return isLabComplete(labSlug)
         if (filter === 'in-progress') {
-            const steps = getCompletedSteps(labNumber)
-            return steps.length > 0 && !isLabComplete(labNumber)
+            const steps = getCompletedSteps(labSlug)
+            return steps.length > 0 && !isLabComplete(labSlug)
         }
         return true
     })

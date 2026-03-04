@@ -4,8 +4,8 @@ import { X, ChevronDown, ChevronUp } from 'lucide-react'
 import type { MissionStep } from '../hooks/useMissionProgress'
 
 // ─── Per-step messages keyed by labId ────────────────────────────────────────
-const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string }>> = {
-    1: {
+const LAB_STEP_MESSAGES: Record<string, Record<number, { ar: string; en: string }>> = {
+    'lab01': {
         1: { ar: 'أهلاً يا كابتن! 👋 الخطوة الأولى: اعرف إنت مين. اكتب whoami في التيرمنال.', en: 'Step 1: Identify your user. Type whoami in the Terminal.' },
         2: { ar: 'ممتاز! 🎉 دور على صاحب الدومين. اكتب whois evilcorp.com.', en: 'Step 2: Query the domain registry with whois.' },
         3: { ar: 'كويس! 💪 استخدم nslookup عشان تحوّل الدومين لـ IP.', en: 'Step 3: Resolve the domain to its IP with nslookup.' },
@@ -14,8 +14,17 @@ const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string 
         6: { ar: 'شاطر! 👏 استخدم site:evilcorp.com عشان تحصر البحث.', en: 'Step 6: Use the site: operator to narrow results.' },
         7: { ar: 'تمام! 🎯 اجمع site: و inurl:admin عشان تلاقي لوحة التحكم.', en: 'Step 7: Combine site: and inurl: to find the admin panel.' },
         8: { ar: '🔓 اضغط على الرابط الأخضر وخد الـ flag يا بطل!', en: 'Step 8: Click the green link to capture the flag!' },
+        // Extras
+        10: { ar: 'التاريخ مبتنسيش! 📜 استخدم dig عشان تشوف الـ DNS Records القديمة.', en: 'Step 10: Use dig to check historical DNS records.' },
+        11: { ar: 'شوف بقى لو هما في بلاك ليست! 🚫', en: 'Step 11: Check blacklists for target IP.' },
+        12: { ar: 'دور على Subdomains من خلال cert.sh 🔒', en: 'Step 12: Hunt for subdomains using Certificate Transparency.' },
+        13: { ar: 'يلا نجيب الـ Flag! 🎯', en: 'Step 13: Capture the flag!' },
+        14: { ar: 'البيانات المسربة كنز! 💎 استخدم theHarvester لجمع الإيميلات.', en: 'Step 14: Run theHarvester to scrape email addresses.' },
+        15: { ar: 'بص على قاعدة بيانات الاختراقات (HaveIBeenPwned API). 💥', en: 'Step 15: Check emails against HaveIBeenPwned database.' },
+        16: { ar: 'جمّع الباسوردات المتسربة وقارن الأنماط. 🧩', en: 'Step 16: Collect leaked hashes and analyze patterns.' },
+        17: { ar: 'عاش! 🏆 خد الفلاج.', en: 'Step 17: Claim the flag.' },
     },
-    2: {
+    'lab02': {
         1: { ar: 'الـ Nmap بيدق على الـ ports! 🔭 ابدأ بـ nmap 192.168.1.5 عشان تشوف البورتات المفتوحة.', en: 'Step 1: Basic Nmap scan — discover open ports.' },
         2: { ar: 'ناعم! ✅ دلوقتي اعرف version كل service. أضف -sV للأمر.', en: 'Step 2: Add -sV to detect service versions.' },
         3: { ar: 'كويس! 🎯 بدل ما تسكن كل البورتات، حدّد البورتات المهمة بـ -p.', en: 'Step 3: Target specific ports with the -p flag.' },
@@ -26,8 +35,15 @@ const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string 
         8: { ar: '-T4 -F يعمل fast scan! ⚡ مفيد للوقت المحدود.', en: 'Step 8: Fast scan with -T4 -F.' },
         9: { ar: 'NSE scripts! 🔍 --script vuln بيدور على CVEs مباشرة.', en: 'Step 9: Run NSE vuln scripts to find CVEs.' },
         10: { ar: 'Host discovery! 🌐 -sn بيعمل ping sweep للـ subnet كلها.', en: 'Step 10: Ping sweep with -sn to map live hosts.' },
+        // Extras
+        11: { ar: 'استخدم -sU لعمل مسح كامل للـ UDP. 📡', en: 'Step 11: Full UDP scan using nmap -sU -p-.' },
+        12: { ar: 'دور على خدمات مخفية زي SNMP. 🕵️‍♂️', en: 'Step 12: Look for easily exploitable services like SNMP.' },
+        13: { ar: 'هات الـ Flag! 🚩', en: 'Step 13: Extract the configuration file flag via tftp.' },
+        14: { ar: 'اسكريبتات Nmap كنز! 📜 اكتب --script vuln للبحث عن الثغرات.', en: 'Step 14: Run Nmap vulnerability scripts (--script vuln).' },
+        15: { ar: 'لقينا ثغرة! اقرأ تفاصيل الـ CVE بدقة. 💥', en: 'Step 15: Analyze the identified CVE output.' },
+        16: { ar: 'اربط معلومات الثغرة ببيئة السيرفر واعمل تقريرك. 📝', en: 'Step 16: Submit the target vulnerability proof.' },
     },
-    3: {
+    'lab03': {
         1: { ar: 'Gobuster بيدق على كل path! 📁 ابدأ بـ gobuster dir على الـ target.', en: 'Step 1: Run Gobuster dir scan to find hidden paths.' },
         2: { ar: 'أضف -x php,html عشان تلاقي ملفات مخفية! 🕵️', en: 'Step 2: Add -x to search for file extensions.' },
         3: { ar: 'Wordlist خاصة للـ admin paths! 🔑 جرّب wordlist مختلفة.', en: 'Step 3: Use an admin-specific wordlist.' },
@@ -38,8 +54,15 @@ const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string 
         8: { ar: '.bak files! 💾 ملفات الـ backup ممكن تحتوي source code أو passwords.', en: 'Step 8: Hunt .bak backup files.' },
         9: { ar: '--delay يخليك stealth! 🥷 بتبطّأ الـ requests عشان ما تتلاحقش.', en: 'Step 9: Stealth mode with --delay.' },
         10: { ar: '-o بيحفظ النتايج! 📝 لازم تكون عندك report في نهاية كل pentest.', en: 'Step 10: Save results to a file with -o.' },
+        // Extras
+        11: { ar: 'خلينا ندور على مسارات الـ API المخفية. 🔌', en: 'Step 11: Fuzz for hidden API endpoints using Gobuster mode.' },
+        12: { ar: 'احياناً بيكون في مسار /v1/ أو /v2/ فيه تسريب معلومات. 🔍', en: 'Step 12: Enumerate API version paths.' },
+        13: { ar: 'افحص استجابة الخادم للملفات. 📄', en: 'Step 13: Capture the exposed JSON payload.' },
+        14: { ar: 'استخدم gobuster vhost لاكتشاف المواقع الموازية على نفس الاي بي. 🌐', en: 'Step 14: Run gobuster vhost against the IP.' },
+        15: { ar: 'بص على الدومين الداخلي dev.evilcorp.local! 🏢', en: 'Step 15: Found internal development subdomain.' },
+        16: { ar: 'هنا الـ Flag الحقيقي. 🎯', en: 'Step 16: Access the VHost platform flag.' },
     },
-    4: {
+    'lab04': {
         1: { ar: 'فلتة واحدة " تكسر كل حاجة! 💉 ابدأ بـ single quote وشوف لو في error.', en: "Step 1: Test with a single quote ' to trigger SQL errors." },
         2: { ar: "OR '1'='1 بيعمل bypass! ✅ الـ WHERE بتاعة الـ SQL دايماً true.", en: "Step 2: Classic auth bypass — OR '1'='1 always true." },
         3: { ar: "admin'-- بيشيل الـ password check بالكامل! 💬 -- تعليق في SQL.", en: "Step 3: Comment injection with admin'-- removes password check." },
@@ -50,8 +73,15 @@ const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string 
         8: { ar: '32 حرف = MD5! 🔓 MD5 مكسور تماماً من 2005.', en: 'Step 8: Measure hash length to identify the algorithm.' },
         9: { ar: 'LOAD_FILE بيقرأ أي ملف على السيرفر! 📄 /etc/passwd كنز من المعلومات.', en: 'Step 9: LOAD_FILE to read files from the server.' },
         10: { ar: 'INTO OUTFILE + PHP shell = RCE! 💀 أخطر سيناريو في SQLi.', en: 'Step 10: Write a PHP web shell via INTO OUTFILE → RCE!' },
+        // Extras
+        11: { ar: 'عشان مفيش error بيظهر، لازم تستخدم الـ sleep. ⏱️', en: 'Step 11: Boolean blind SQLi test using SLEEP().' },
+        12: { ar: 'ابني الاستعلام حرف بحرف. العملية محتاجة شوية صبر! 🐢', en: 'Step 12: Build the query to iteratively guess characters.' },
+        13: { ar: 'ممتاز! ده الباسورد المخفي. 🔑', en: 'Step 13: Recover the password using timing differences.' },
+        14: { ar: 'اكتب الكود الخبيث في البروفايل بتاعك. 💣', en: 'Step 14: Deposit the SQL injection payload in your profile.' },
+        15: { ar: 'استنى لما الـ Admin يفتح الصفحة. ⏳', en: 'Step 15: Wait for admin component to trigger execution.' },
+        16: { ar: 'ضربت! الداتا اتسحبت. 💥', en: 'Step 16: Payload executed externally!' },
     },
-    5: {
+    'lab05': {
         1: { ar: 'nc port 80 يجيبلك HTTP banner! 🌐 السيرفر بيحكيلك version بتاعته.', en: 'Step 1: nc port 80 — grab the HTTP server banner.' },
         2: { ar: 'nc port 22 بيكشف OpenSSH version! 🔐 ومعاها CVEs جاهزة.', en: 'Step 2: nc port 22 — SSH banner reveals OpenSSH version + CVEs.' },
         3: { ar: 'nc port 21 FTP! 📁 لو anonymous login شغال = مشكلة كبيرة.', en: 'Step 3: nc port 21 — FTP banner, check for anonymous login.' },
@@ -62,6 +92,13 @@ const LAB_STEP_MESSAGES: Record<number, Record<number, { ar: string; en: string 
         8: { ar: 'nc port 25 SMTP! 📧 VRFY command بيأكد أسماء المستخدمين.', en: 'Step 8: nc port 25 — SMTP VRFY user enumeration.' },
         9: { ar: 'WhatWeb بيشوف كل technology دفعة واحدة! 🔮 CMS + framework + version.', en: 'Step 9: WhatWeb — one-shot web tech fingerprint.' },
         10: { ar: 'Nikto بيعمل فحص شامل! 🏁 phpMyAdmin + backup + phpinfo = كنز.', en: 'Step 10: Nikto — full automated web vulnerability scan.' },
+        // Extras
+        11: { ar: 'افحص OpenSSH النسخة 7.2.. في مشكلة هنا! 🔐', en: 'Step 11: Verify the OpenSSH banner version.' },
+        12: { ar: 'استخدم أداة قياس التوقيت عند تسجيل الدخول لتحديد المستخدمين. ⏱️', en: 'Step 12: Perform CVE-2018-15473 timing attack.' },
+        13: { ar: 'لقيت المستخدم! ادخل خد الفلاج. 🚩', en: 'Step 13: Validate the correct username.' },
+        14: { ar: 'استخدم WhatWeb عشان تجيب ملخص لكل المكونات للموقع. 🔮', en: 'Step 14: Use WhatWeb against the target.' },
+        15: { ar: 'فيه نسخة WordPress قديمة! استخدم WPScan. ⚠️', en: 'Step 15: Pivot directly to WPScan for CMS vulnerabilities.' },
+        16: { ar: 'وصلت للاستغلال المطلوب. 🎯', en: 'Step 16: Submit proof of outdated stack CMS.' },
     },
 }
 
@@ -77,10 +114,10 @@ interface Props {
     currentStepId: number | null
     steps: MissionStep[]
     allComplete: boolean
-    labId?: number
+    labId?: string
 }
 
-export default function FloatingAssistant({ currentStepId, steps, allComplete, labId = 1 }: Props) {
+export default function FloatingAssistant({ currentStepId, steps, allComplete, labId = 'lab01' }: Props) {
     const [open, setOpen] = useState(false)
     const [tipIdx, setTipIdx] = useState(0)
     const [showBubble, setShowBubble] = useState(true)
@@ -88,7 +125,7 @@ export default function FloatingAssistant({ currentStepId, steps, allComplete, l
     const bubbleTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
     // Current contextual message — looks up the per-lab, per-step table
-    const labMessages = LAB_STEP_MESSAGES[labId] ?? LAB_STEP_MESSAGES[1]
+    const labMessages = LAB_STEP_MESSAGES[labId] ?? LAB_STEP_MESSAGES['lab01']
     const currentMsg = currentStepId
         ? labMessages[currentStepId]
         : allComplete

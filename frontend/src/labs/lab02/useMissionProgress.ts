@@ -104,6 +104,50 @@ const INITIAL_STEPS: MissionStep[] = [
         quipAr: 'قبل ما تصطاد سمكة، لازم تعرف في فين السمك في البحيرة 🎣',
         completed: false,
     },
+    // --- Extra 1: Deep UDP ---
+    {
+        id: 11, tool: 'terminal', title: 'Extra: Full UDP scan',
+        objective: 'UDP is slow but important. Scan full range.',
+        hint: 'nmap -sU -p- 192.168.1.5',
+        quipAr: 'استخدم -sU لعمل مسح كامل للـ UDP. 📡',
+        completed: false,
+    },
+    {
+        id: 12, tool: 'terminal', title: 'Extra: SNMP Enumeration',
+        objective: 'Look for easily exploitable services like SNMP on port 161.',
+        hint: 'nmap -sU -p 161 --script snmp-brute 192.168.1.5',
+        quipAr: 'دور على خدمات مخفية زي SNMP. 🕵️‍♂️',
+        completed: false,
+    },
+    {
+        id: 13, tool: 'terminal', title: 'Extra: Capture UDP Flag',
+        objective: 'Extract the configuration file flag via retrieved protocol.',
+        hint: 'curl tftp://192.168.1.5/flag.txt',
+        quipAr: 'هات الـ Flag! 🚩',
+        completed: false,
+    },
+    // --- Extra 2: Vulnerability Triage ---
+    {
+        id: 14, tool: 'terminal', title: 'Extra: Run NSE scripts',
+        objective: 'Run Nmap vulnerability scripts (--script vuln).',
+        hint: 'nmap --script vuln 192.168.1.5',
+        quipAr: 'اسكريبتات Nmap كنز! 📜 اكتب --script vuln للبحث عن الثغرات.',
+        completed: false,
+    },
+    {
+        id: 15, tool: 'terminal', title: 'Extra: Analyze CVE',
+        objective: 'Analyze the identified CVE output.',
+        hint: 'searchsploit CVE-2023-XXXX',
+        quipAr: 'لقينا ثغرة! اقرأ تفاصيل الـ CVE بدقة. 💥',
+        completed: false,
+    },
+    {
+        id: 16, tool: 'terminal', title: 'Extra: Submit Vulnerability Report',
+        objective: 'Submit the target vulnerability proof.',
+        hint: 'submit_flag vuln_report',
+        quipAr: 'اربط معلومات الثغرة ببيئة السيرفر واعمل تقريرك. 📝',
+        completed: false,
+    },
 ]
 
 function loadProgress(): MissionStep[] {
@@ -122,7 +166,7 @@ function saveProgress(steps: MissionStep[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completedIds))
 }
 
-export function useMissionProgress() {
+export function useMissionProgress(labId: string) {
     const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
@@ -135,11 +179,13 @@ export function useMissionProgress() {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
             if (next !== prev) {
                 saveProgress(next)
-                saveStep(2, stepId)
+                const completedCnt = next.filter((s) => s.completed).length
+                const isFinal = completedCnt === next.length
+                saveStep(labId, stepId, 150, isFinal)
             }
             return next
         })
-    }, [])
+    }, [labId, saveStep])
 
     const resetProgress = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY)

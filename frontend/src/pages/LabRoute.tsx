@@ -1,13 +1,11 @@
 /**
  * LabRoute — Dynamic lazy loader + unlock guard
  * Lab N (number > 1) is only accessible if lab N-1 is fully complete.
- * Unauthenticated users can access Lab 01 freely.
  */
 import { lazy, Suspense } from 'react'
 import { useParams, Navigate, useNavigate } from 'react-router-dom'
 import { findLab } from '../labs/registry'
 import { useProgress } from '../context/ProgressContext'
-import { useAuth } from '../context/AuthContext'
 
 const PAGE_MODULES = import.meta.glob('../labs/*/Page.tsx') as Record<
     string,
@@ -50,8 +48,7 @@ function LockedScreen({ labTitle }: { labTitle: string }) {
 
 export default function LabRoute() {
     const { slug } = useParams<{ slug: string }>()
-    const { isLabUnlocked, } = useProgress()
-    const { loading: authLoading } = useAuth()
+    const { isLabUnlocked } = useProgress()
 
     if (!slug) return <Navigate to="/" replace />
 
@@ -60,9 +57,6 @@ export default function LabRoute() {
 
     // Convert "01" → 1
     const labNumber = parseInt(meta.number, 10)
-
-    // Wait for auth to load before showing lock screen (avoid flash)
-    if (authLoading) return <LoadingScreen />
 
     // Lock check: lab 1 always open; labs 2-5 need previous complete
     if (labNumber > 1 && !isLabUnlocked(labNumber)) {

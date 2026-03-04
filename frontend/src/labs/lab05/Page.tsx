@@ -17,7 +17,7 @@ export default function Lab05() {
     const navigate = useNavigate()
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
     const [showCelebration, setShowCelebration] = useState(false)
-    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress()
+    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress('lab05')
 
     const totalSteps = steps.length
     const progressPct = Math.round((completedCount / totalSteps) * 100)
@@ -45,7 +45,28 @@ export default function Lab05() {
         // Step 9: whatweb
         if (c.startsWith('whatweb') && !steps[8].completed) { completeStep(9); return }
         // Step 10: nikto
-        if (c.startsWith('nikto') && c.includes('-h') && !steps[9].completed) { completeStep(10); setShowCelebration(true) }
+        if (c.startsWith('nikto') && c.includes('-h') && !steps[9].completed) { completeStep(10); return }
+
+        // Step 11: OpenSSH 7.2 Validation
+        if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('22') && steps[1].completed && !steps[10].completed) { completeStep(11); return }
+
+        // Step 12: User Enum Timing
+        if (c.startsWith('python') && c.includes('ssh_enum.py') && !steps[11].completed) { completeStep(12); return }
+
+        // Step 13: Verify Username
+        if (c.startsWith('submit_flag') && c.includes('admin_user') && !steps[12].completed) { completeStep(13); return }
+
+        // Step 14: WhatWeb Scan
+        if (c.startsWith('whatweb') && steps[8].completed && !steps[13].completed) { completeStep(14); return }
+
+        // Step 15: CMS Vuln Scan
+        if (c.startsWith('wpscan') && !steps[14].completed) { completeStep(15); return }
+
+        // Step 16: Submit Stack Vulns
+        if (c.startsWith('submit_flag') && c.includes('wp_cve_detected') && !steps[15].completed) {
+            completeStep(16)
+            setShowCelebration(true)
+        }
     }
 
     return (
@@ -168,7 +189,7 @@ export default function Lab05() {
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         <div className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5">
                             <Terminal size={14} />🏷️ Banner Terminal
-                            <span className="text-xs opacity-50">10 steps</span>
+                            <span className="text-xs opacity-50">16 steps</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">{completedCount}/{totalSteps} done</span>
@@ -184,7 +205,7 @@ export default function Lab05() {
             </main>
             <Footer />
             <LabCompletionCelebration isOpen={showCelebration} labTitle="El-Basaama" labNumber="05" points={250} onClose={() => setShowCelebration(false)} />
-            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} labId={5} />
+            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} />
         </div>
     )
 }

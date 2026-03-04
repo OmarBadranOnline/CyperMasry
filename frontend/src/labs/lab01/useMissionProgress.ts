@@ -77,6 +77,64 @@ const INITIAL_STEPS: MissionStep[] = [
         quipAr: 'يلا دوس! المهمة خلصت يا وحش 🔥',
         completed: false,
     },
+    // --- Extra 1: Advanced Lookup ---
+    {
+        id: 10, tool: 'terminal', title: 'Extra: Historical DNS (dig)',
+        objective: 'Use dig to check for historical DNS records of the target.',
+        hint: 'dig evilcorp.com any',
+        quipAr: 'التاريخ مبتنسيش! 📜',
+        completed: false,
+    },
+    {
+        id: 11, tool: 'terminal', title: 'Extra: Blacklist Check',
+        objective: 'Check if the IP is listed on any blacklists.',
+        hint: 'curl https://blacklist-check.api/evilcorp.com',
+        quipAr: 'شوف بقى لو هما في بلاك ليست! 🚫',
+        completed: false,
+    },
+    {
+        id: 12, tool: 'zoogle', title: 'Extra: Certificate Transparency',
+        objective: 'Hunt for subdomains using crt.sh query.',
+        hint: 'site:crt.sh evilcorp.com',
+        quipAr: 'دور على Subdomains من خلال cert.sh 🔒',
+        completed: false,
+    },
+    {
+        id: 13, tool: 'terminal', title: 'Extra: Capture CT Flag',
+        objective: 'Access the discovered dev subdomain flag.',
+        hint: 'curl dev.evilcorp.com/flag',
+        quipAr: 'يلا نجيب الـ Flag! 🎯',
+        completed: false,
+    },
+    // --- Extra 2: Corporate Intel ---
+    {
+        id: 14, tool: 'terminal', title: 'Extra: Email Scraping',
+        objective: 'Run theHarvester to scrape email addresses for the domain.',
+        hint: 'theHarvester -d evilcorp.com -b all',
+        quipAr: 'البيانات المسربة كنز! 💎',
+        completed: false,
+    },
+    {
+        id: 15, tool: 'terminal', title: 'Extra: Breach Check',
+        objective: 'Check harvested emails against HaveIBeenPwned.',
+        hint: 'curl haveibeenpwned.com/api/v3/breachedaccount/admin@evilcorp.com',
+        quipAr: 'بص على قاعدة بيانات الاختراقات (HaveIBeenPwned). 💥',
+        completed: false,
+    },
+    {
+        id: 16, tool: 'terminal', title: 'Extra: Hash Analysis',
+        objective: 'Analyze the pattern of leaked password hashes.',
+        hint: 'hash-identifier 5f4dcc3b5aa765d61d8327deb882cf99',
+        quipAr: 'جمّع الباسوردات المتسربة وقارن الأنماط. 🧩',
+        completed: false,
+    },
+    {
+        id: 17, tool: 'terminal', title: 'Extra: Claim Intel Flag',
+        objective: 'Submit the findings to claim the final Intel flag.',
+        hint: 'submit_flag intel_complete',
+        quipAr: 'عاش! 🏆 خد الفلاج.',
+        completed: false,
+    },
 ]
 
 function loadProgress(): MissionStep[] {
@@ -95,7 +153,7 @@ function saveProgress(steps: MissionStep[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completedIds))
 }
 
-export function useMissionProgress() {
+export function useMissionProgress(labId: string) {
     const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
@@ -108,11 +166,13 @@ export function useMissionProgress() {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
             if (next !== prev) {
                 saveProgress(next) // local storage
-                saveStep(1, stepId) // server sync
+                const completedCnt = next.filter((s) => s.completed).length
+                const isFinal = completedCnt === next.length
+                saveStep(labId, stepId, 100, isFinal) // server sync
             }
             return next
         })
-    }, [])
+    }, [labId, saveStep])
 
     const resetProgress = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY)

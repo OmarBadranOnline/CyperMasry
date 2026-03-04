@@ -17,7 +17,7 @@ export default function Lab03() {
     const navigate = useNavigate()
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
     const [showCelebration, setShowCelebration] = useState(false)
-    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress()
+    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress('lab03')
 
     const totalSteps = steps.length
     const progressPct = Math.round((completedCount / totalSteps) * 100)
@@ -45,7 +45,28 @@ export default function Lab03() {
         // Step 9: delay stealth
         if (c.includes('gobuster dir') && c.includes('--delay') && !steps[8].completed) { completeStep(9); return }
         // Step 10: output to file
-        if (c.includes('gobuster dir') && c.includes('-o') && !steps[9].completed) { completeStep(10); setShowCelebration(true) }
+        if (c.includes('gobuster dir') && c.includes('-o') && !steps[9].completed) { completeStep(10); return }
+
+        // Step 11: Extra: Fuzz API versions
+        if (c.includes('gobuster dir') && c.includes('/api') && c.includes('api.txt') && !steps[10].completed) { completeStep(11); return }
+
+        // Step 12: Extra: Check /v2/ leaked data
+        if (c.startsWith('curl') && c.includes('/api/v2/users') && !steps[11].completed) { completeStep(12); return }
+
+        // Step 13: Extra: Extract JSON payload
+        if (c.startsWith('curl') && c.includes('/api/v2/users') && c.includes('|') && c.includes('jq') && !steps[12].completed) { completeStep(13); return }
+
+        // Step 14: Extra: VHost Fuzzing
+        if (c.includes('gobuster vhost') && !steps[13].completed) { completeStep(14); return }
+
+        // Step 15: Extra: Target VHost
+        if (c.startsWith('curl') && c.includes('-h') && c.includes('dev.evilcorp.local') && !steps[14].completed) { completeStep(15); return }
+
+        // Step 16: Extra: Access Platform Flag
+        if (c.startsWith('submit_flag') && c.includes('vhost_dev') && !steps[15].completed) {
+            completeStep(16);
+            setShowCelebration(true)
+        }
     }
 
     return (
@@ -171,7 +192,7 @@ export default function Lab03() {
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         <div className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5">
                             <Terminal size={14} />💻 Gobuster Terminal
-                            <span className="text-xs opacity-50">10 steps</span>
+                            <span className="text-xs opacity-50">16 steps</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">{completedCount}/{totalSteps} done</span>
@@ -187,7 +208,7 @@ export default function Lab03() {
             </main>
             <Footer />
             <LabCompletionCelebration isOpen={showCelebration} labTitle="El-Daraaj El-Serry" labNumber="03" points={175} onClose={() => setShowCelebration(false)} />
-            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} labId={3} />
+            <FloatingAssistant currentStepId={currentStepId} steps={steps} allComplete={allComplete} />
         </div>
     )
 }

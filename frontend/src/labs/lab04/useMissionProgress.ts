@@ -104,6 +104,50 @@ const INITIAL_STEPS: MissionStep[] = [
         quipAr: 'SQLi → RCE! بتكتب PHP shell للـ web root وبتتحكم في كل السيرفر 💀',
         completed: false,
     },
+    // --- Extra 1: Blind SQLi ---
+    {
+        id: 11, tool: 'terminal', title: 'Extra: Sleep Injection',
+        objective: 'Boolean blind SQLi test with SLEEP() function.',
+        hint: "' OR SLEEP(5)--",
+        quipAr: 'عشان مفيش error بيظهر، لازم تستخدم الـ sleep. ⏱️',
+        completed: false,
+    },
+    {
+        id: 12, tool: 'terminal', title: 'Extra: Binary Search DB',
+        objective: 'Build the query to iteratively guess characters.',
+        hint: "' OR IF(ASCII(SUBSTRING(version(),1,1))>100,SLEEP(5),0)--",
+        quipAr: 'ابني الاستعلام حرف بحرف. العملية محتاجة شوية صبر! 🐢',
+        completed: false,
+    },
+    {
+        id: 13, tool: 'terminal', title: 'Extra: Password Recovered',
+        objective: 'Recover the password using timing differences.',
+        hint: 'submit_flag 5c3r3tp4ss',
+        quipAr: 'ممتاز! ده الباسورد المخفي. 🔑',
+        completed: false,
+    },
+    // --- Extra 2: Second Order ---
+    {
+        id: 14, tool: 'terminal', title: 'Extra: Account Profile Injection',
+        objective: 'Deposit the SQL injection payload in the profile description.',
+        hint: "update_profile \"admin'--\"",
+        quipAr: 'اكتب الكود الخبيث في البروفايل بتاعك. 💣',
+        completed: false,
+    },
+    {
+        id: 15, tool: 'terminal', title: 'Extra: Wait for Admin',
+        objective: 'Wait for admin verification component to trigger.',
+        hint: "wait 60",
+        quipAr: 'استنى لما الـ Admin يفتح الصفحة. ⏳',
+        completed: false,
+    },
+    {
+        id: 16, tool: 'terminal', title: 'Extra: Extract Delayed Payload',
+        objective: 'Payload executed externally, verify execution.',
+        hint: 'submit_flag 2nd_order_win',
+        quipAr: 'ضربت! الداتا اتسحبت. 💥',
+        completed: false,
+    },
 ]
 
 function loadProgress(): MissionStep[] {
@@ -122,7 +166,7 @@ function saveProgress(steps: MissionStep[]) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completedIds))
 }
 
-export function useMissionProgress() {
+export function useMissionProgress(labId: string) {
     const { saveStep } = useProgress()
     const [steps, setSteps] = useState<MissionStep[]>(loadProgress)
 
@@ -135,11 +179,13 @@ export function useMissionProgress() {
             const next = prev.map((s) => (s.id === stepId && !s.completed ? { ...s, completed: true } : s))
             if (next !== prev) {
                 saveProgress(next)
-                saveStep(4, stepId)
+                const completedCnt = next.filter((s) => s.completed).length
+                const isFinal = completedCnt === next.length
+                saveStep(labId, stepId, 200, isFinal)
             }
             return next
         })
-    }, [])
+    }, [labId, saveStep])
 
     const resetProgress = useCallback(() => {
         localStorage.removeItem(STORAGE_KEY)

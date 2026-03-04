@@ -30,7 +30,7 @@ export default function Lab01Page() {
     const [activeTab, setActiveTab] = useState<ActiveTab>('terminal')
     const [reviewingStepId, setReviewingStepId] = useState<number | null>(null)
     const [celebrationOpen, setCelebrationOpen] = useState(false)
-    const { steps, currentStepId, allComplete, completedCount, completeStep } = useMissionProgress()
+    const { steps, currentStepId, allComplete, completedCount, completeStep, resetProgress } = useMissionProgress('lab01')
 
     // Fire celebration exactly once when all steps complete
     useEffect(() => {
@@ -293,6 +293,16 @@ export default function Lab01Page() {
                             })}
                         </div>
 
+                        {/* Reset */}
+                        <div className="mt-4">
+                            <button
+                                onClick={resetProgress}
+                                className="w-full font-mono text-xs text-gray-600 hover:text-neon-amber border border-dark-border hover:border-neon-amber/30 rounded-lg py-2 transition-all"
+                            >
+                                ↺ Reset Lab Progress
+                            </button>
+                        </div>
+
                         {/* Concept recap */}
                         <div className="mt-5 border-t border-dark-border pt-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -325,9 +335,9 @@ export default function Lab01Page() {
                     {/* Tabs */}
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         {[
-                            { id: 'terminal' as ActiveTab, label: '💻 Terminal', steps: '1–4' },
+                            { id: 'terminal' as ActiveTab, label: '💻 Terminal', steps: '1–4, 10–11, 13–17' },
                             { id: 'linkedin' as ActiveTab, label: '🔎 LinkedIn', steps: '5' },
-                            { id: 'zoogle' as ActiveTab, label: '🔍 Zoogle', steps: '6–9' },
+                            { id: 'zoogle' as ActiveTab, label: '🔍 Zoogle', steps: '6–9, 12' },
                         ].map(({ id, label, steps: s }) => (
                             <button
                                 key={id}
@@ -352,70 +362,64 @@ export default function Lab01Page() {
                     </div>
 
                     {/* Tab Content */}
-                    <div className="flex-1 overflow-hidden p-5">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'terminal' && (
-                                <motion.div
-                                    key="terminal"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <TerminalSimulator
-                                        currentStepId={currentStepId}
-                                        onCommandRun={(cmd) => {
-                                            const c = cmd.trim().toLowerCase()
-                                            // Typo-tolerant matching — students often mis-spell the domain
-                                            if (c === 'whoami') {
-                                                completeStep(1)
-                                            } else if (c.startsWith('whois')) {
-                                                completeStep(2)
-                                            } else if (c.startsWith('nslookup')) {
-                                                completeStep(3)
-                                            } else if (c.startsWith('curl')) {
-                                                completeStep(4)
-                                            }
-                                        }}
-                                    />
-                                </motion.div>
-                            )}
-                            {activeTab === 'linkedin' && (
-                                <motion.div
-                                    key="linkedin"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <FakeLinkedIn onPetNameFound={() => completeStep(5)} />
-                                </motion.div>
-                            )}
-                            {activeTab === 'zoogle' && (
-                                <motion.div
-                                    key="zoogle"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="h-full"
-                                >
-                                    <ZoogleSearch
-                                        currentStepId={currentStepId}
-                                        onSearchRun={(query) => {
-                                            const q = query.trim().toLowerCase()
-                                            if (q.includes('site:evilcorp.com') && q.includes('inurl:admin')) {
-                                                completeStep(8)
-                                            } else if (q.includes('site:evilcorp.com')) {
-                                                completeStep(7)
-                                            } else if (q.includes('admin') || q.includes('login')) {
-                                                completeStep(6)
-                                            }
-                                        }}
-                                        onFlagCaptured={() => completeStep(9)}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    <div className="flex-1 overflow-hidden p-5 relative">
+                        {/* Terminal Tab */}
+                        <div className={`h-full absolute inset-0 p-5 ${activeTab === 'terminal' ? 'block' : 'hidden'}`}>
+                            <TerminalSimulator
+                                currentStepId={currentStepId}
+                                onCommandRun={(cmd) => {
+                                    const c = cmd.trim().toLowerCase()
+                                    if (c === 'whoami') {
+                                        completeStep(1)
+                                    } else if (c.startsWith('whois')) {
+                                        completeStep(2)
+                                    } else if (c.startsWith('nslookup')) {
+                                        completeStep(3)
+                                    } else if (c.startsWith('curl') && c.includes('blacklist-check')) {
+                                        completeStep(11)
+                                    } else if (c.startsWith('curl') && c.includes('dev.evilcorp.com/flag')) {
+                                        completeStep(13)
+                                    } else if (c.startsWith('curl') && c.includes('haveibeenpwned')) {
+                                        completeStep(15)
+                                    } else if (c.startsWith('curl')) {
+                                        completeStep(4)
+                                    } else if (c.startsWith('dig')) {
+                                        completeStep(10)
+                                    } else if (c.startsWith('theharvester')) {
+                                        completeStep(14)
+                                    } else if (c.startsWith('hash-identifier')) {
+                                        completeStep(16)
+                                    } else if (c.startsWith('submit_flag') && c.includes('intel_complete')) {
+                                        completeStep(17)
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {/* LinkedIn Tab */}
+                        <div className={`h-full absolute inset-0 p-5 ${activeTab === 'linkedin' ? 'block' : 'hidden'}`}>
+                            <FakeLinkedIn onPetNameFound={() => completeStep(5)} />
+                        </div>
+
+                        {/* Zoogle Tab */}
+                        <div className={`h-full absolute inset-0 p-5 ${activeTab === 'zoogle' ? 'block' : 'hidden'}`}>
+                            <ZoogleSearch
+                                currentStepId={currentStepId}
+                                onSearchRun={(query) => {
+                                    const q = query.trim().toLowerCase()
+                                    if (q.includes('site:crt.sh')) {
+                                        completeStep(12)
+                                    } else if (q.includes('site:evilcorp.com') && q.includes('inurl:admin')) {
+                                        completeStep(8)
+                                    } else if (q.includes('site:evilcorp.com')) {
+                                        completeStep(7)
+                                    } else if (q.includes('admin') || q.includes('login')) {
+                                        completeStep(6)
+                                    }
+                                }}
+                                onFlagCaptured={() => completeStep(9)}
+                            />
+                        </div>
                     </div>
                 </div>
             </main>
