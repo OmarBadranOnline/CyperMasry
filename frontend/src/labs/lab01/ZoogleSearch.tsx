@@ -27,30 +27,89 @@ const STEP_HINTS: Record<number, string> = {
 function getSearchResult(query: string): SearchResult {
     const q = query.trim().toLowerCase()
 
-    if (q.includes('site:evilcorp.com') && q.includes('inurl:admin')) {
+    if (q.length === 0) return { state: 'idle' }
+
+    // Check operators
+    const hasSite = q.includes('site:evilcorp.com')
+    const hasInurlAdmin = q.includes('inurl:admin')
+    const hasAdminRaw = q.includes('admin')
+    const hasFiletypePdf = q.includes('filetype:pdf')
+    const hasIntitle = q.includes('intitle:index of') || q.includes('intitle:"index of"')
+
+    // Step 8: Perfect dork (site + inurl:admin)
+    if (hasSite && hasInurlAdmin) {
         return {
             state: 'admin-found',
             statsLine: '1 result (0.04 seconds)',
             feedbackEn: '✅ Precise dork. Target admin page located.',
+            feedbackAr: 'الله ينور! جبت لوحة التحكم من قفاها 🎯',
             results: [
                 {
                     title: 'EvilCorp Admin Panel – Login',
                     url: 'evilcorp.com/secret_panel',
-                    snippet:
-                        'Admin Control Panel · Restricted Access · EvilCorp Internal Systems Management · Powered by CustomCMS v2.1',
+                    snippet: 'Admin Control Panel · Restricted Access · EvilCorp Internal Systems Management · Powered by CustomCMS v2.1',
                     isTarget: true,
                 },
             ],
         }
     }
 
-    if (q.includes('site:evilcorp.com')) {
+    // Advanced Recon: Directory Listing (intitle:"index of")
+    if (hasIntitle && hasSite) {
+        return {
+            state: 'site-found',
+            statsLine: '1 result (0.12 seconds)',
+            feedbackEn: 'Directory listing enabled! This is a misconfiguration exposing server files directly.',
+            feedbackAr: 'سيرفر ناسي يقفل الـ Directory Listing.. كل ملفاته مكشوفة 📂',
+            results: [
+                {
+                    title: 'Index of /uploads/confidential/',
+                    url: 'evilcorp.com/uploads/confidential/',
+                    snippet: 'Name Last modified Size Description Parent Directory - passwords.txt 2024-01-01 1.2K backup_db.sql...',
+                }
+            ]
+        }
+    }
+
+    // Advanced Recon: PDF exposure (site + filetype)
+    if (hasSite && hasFiletypePdf) {
+         return {
+            state: 'site-found',
+            statsLine: '14 results (0.28 seconds)',
+            feedbackEn: 'Awesome! Searching for specific file types on a target limits the noise and finds raw data.',
+            feedbackAr: 'ممتاز! تصفية الملفات بالـ PDF بتجيب مستندات مهمة ممكن يكون فيها metadata خطيرة 📄',
+            results: [
+                {
+                    title: '[PDF] EvilCorp Annual Report 2023',
+                    url: 'evilcorp.com/reports/annual2023.pdf',
+                    snippet: 'Financial statements, strategic plans, executive contacts...',
+                },
+                {
+                    title: '[PDF] Internal Server Network Topology',
+                    url: 'evilcorp.com/docs/network_map.pdf',
+                    snippet: 'CONFIDENTIAL: Internal IP space 10.0.x.x routing documentation...',
+                },
+            ],
+        }
+    }
+
+    // Step 7: Just site
+    if (hasSite) {
+        // If they also typed admin but forgot inurl:
+        if (hasAdminRaw) {
+             return {
+                state: 'too-broad',
+                statsLine: 'About 45,000 results (0.33 seconds)',
+                feedbackEn: 'You narrowed it to evilcorp.com, but "admin" is just a keyword in the text. Use inurl:admin to find paths.',
+                feedbackAr: 'كلمة admin لوحدها ممكن تكون في مقال عادي. استخدم inurl:admin عشان تدور في الرابط نفسه 🔗',
+            }
+        }
+
         return {
             state: 'site-found',
             statsLine: '3 results (0.21 seconds)',
-            feedbackEn:
-                "Good — you narrowed results to the target domain. Now add inurl: to find specific pages.",
-            feedbackAr: 'كويس! ضيّقنا البحث للدومين.. بس فين الصفحة المهمة؟ 🤔',
+            feedbackEn: "Good — you narrowed results to the target domain. Now use operators like inurl: or filetype: to find specific things.",
+            feedbackAr: 'كويس! ضيّقنا البحث للدومين.. بس فين الصفحة المهمة؟ استخدم operators تانية 🤔',
             results: [
                 {
                     title: 'EvilCorp – Home',
@@ -71,50 +130,32 @@ function getSearchResult(query: string): SearchResult {
         }
     }
 
-    if (
-        q.includes('admin') ||
-        q.includes('login') ||
-        q.includes('panel') ||
-        q.includes('password') ||
-        q.includes('inurl:admin')
-    ) {
-        return {
-            state: 'too-broad',
-            statsLine: 'About 4,230,000,000 results (0.78 seconds)',
-            feedbackEn:
-                "Way too broad — billions of results. Google Dorks need operators to be useful. Try narrowing with  site:  first.",
-            feedbackAr: 'يا عم ده زي ما تسأل "فين المحل؟" من غير ما تحدد أي مدينة 😂',
-        }
-    }
-
+    // Broad filetype search (no site)
     if (q.includes('filetype:')) {
         return {
             state: 'too-broad',
-            statsLine: 'About 892,000 results (0.31 seconds)',
-            feedbackEn: 'filetype: is a valid dork operator! Combine with site: to narrow further.',
-            feedbackAr: 'مش غلط يا صاحبي.. بس combine the operators 💡',
-            results: [
-                {
-                    title: '[PDF] EvilCorp Annual Report 2023',
-                    url: 'evilcorp.com/reports/annual2023.pdf',
-                    snippet: 'Financial statements, strategic plans, executive contacts...',
-                },
-                {
-                    title: '[PDF] EvilCorp Employee Handbook',
-                    url: 'evilcorp.com/docs/handbook.pdf',
-                    snippet: 'Onboarding documentation. Internal policies. Fun reading.',
-                },
-            ],
+            statsLine: 'About 283,000,000 results (0.41 seconds)',
+            feedbackEn: 'filetype: works, but you are searching the ENTIRE internet for PDFs. Combine with site:evilcorp.com.',
+            feedbackAr: 'إنت كده بتدور في ملفات الإنترنت كلها! حط site: الأول 🌍',
         }
     }
 
-    if (q.length === 0) return { state: 'idle' }
+    // Step 6: Generic keywords missing operators
+    if (q.includes('admin') || q.includes('login') || q.includes('password') || q.includes('inurl:')) {
+         return {
+            state: 'too-broad',
+            statsLine: 'About 4,230,000,000 results (0.78 seconds)',
+            feedbackEn: "Way too broad. Searching 'admin' without a site: operator searches the whole web. Start with site:evilcorp.com.",
+            feedbackAr: 'يا عم ده زي ما تسأل "فين المحل؟" من غير ما تحدد أي مدينة 😂 ابدأ بـ site:evilcorp.com',
+        }
+    }
 
+    // completely generic
     return {
         state: 'too-broad',
         statsLine: 'About 10,400,000,000 results (0.56 seconds)',
-        feedbackEn: 'Too generic. Use site:, inurl:, filetype:, or intitle: operators.',
-        feedbackAr: 'حاول تاني بـ operators يا كابتن 💪',
+        feedbackEn: 'Too generic. Use site:, inurl:, filetype:, or intitle: operators to perform actual OSINT.',
+        feedbackAr: 'بحث عادي جداً. جرب تستخدم dorks زي site: أو inurl: يا كابتن 💪',
     }
 }
 
@@ -127,6 +168,7 @@ interface Props {
 export default function ZoogleSearch({ currentStepId, onSearchRun, onFlagCaptured }: Props) {
     const [query, setQuery] = useState('')
     const [submitted, setSubmitted] = useState('')
+    const [searchId, setSearchId] = useState(0) // Force unmount on new searches
     const [result, setResult] = useState<SearchResult>({ state: 'idle' })
     const [modalOpen, setModalOpen] = useState(false)
     const [showDorkGuide, setShowDorkGuide] = useState(false)
@@ -135,6 +177,7 @@ export default function ZoogleSearch({ currentStepId, onSearchRun, onFlagCapture
         e.preventDefault()
         if (!query.trim()) return
         setSubmitted(query)
+        setSearchId((prev) => prev + 1)
         setResult(getSearchResult(query))
         onSearchRun?.(query)
     }
@@ -259,7 +302,7 @@ export default function ZoogleSearch({ currentStepId, onSearchRun, onFlagCapture
                 <AnimatePresence mode="wait">
                     {result.state !== 'idle' && submitted ? (
                         <motion.div
-                            key={submitted}
+                            key={`${submitted}-${searchId}`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
