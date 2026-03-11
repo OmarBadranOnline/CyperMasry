@@ -19,12 +19,14 @@ import {
     ChevronDown,
     ChevronUp,
     RotateCcw,
+    Brain,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import FloatingAssistant from '../../components/FloatingAssistant'
 import LabCompletionCelebration from '../../components/LabCompletionCelebration'
+import ChallengeStep from '../../components/ChallengeStep'
 import NmapTerminal from './NmapTerminal'
 import { useMissionProgress } from './useMissionProgress'
 
@@ -65,48 +67,54 @@ export default function Lab02() {
         // Step 5: aggressive scan (-A)
         if (hasFlag('-a') && !hasFlag('-t4') && c.includes('192.168.1.5') && !steps[4].completed) { completeStep(5); return }
 
-        // Step 6: full port scan (-p-)
-        if (c.includes('-p-') && c.includes('192.168.1.5') && !steps[5].completed) { completeStep(6); return }
+        // Step 6 is Challenge (auto-handled by ChallengeStep component)
 
-        // Step 7: UDP scan (-sU or -su)
-        if (hasFlag('-su') && c.includes('192.168.1.5') && !steps[6].completed) { completeStep(7); return }
+        // Step 7: full port scan (-p-)
+        if (c.includes('-p-') && c.includes('192.168.1.5') && !steps[6].completed) { completeStep(7); return }
 
-        // Step 8: fast scan (-T4 -F)
-        if (hasFlag('-t4') && hasFlag('-f') && c.includes('192.168.1.5') && !steps[7].completed) { completeStep(8); return }
+        // Step 8: UDP scan (-sU or -su)
+        if (hasFlag('-su') && c.includes('192.168.1.5') && !steps[7].completed) { completeStep(8); return }
 
-        // Step 9 & 14: NSE vuln scripts
+        // Step 9: fast scan (-T4 -F)
+        if (hasFlag('-t4') && hasFlag('-f') && c.includes('192.168.1.5') && !steps[8].completed) { completeStep(9); return }
+
+        // Step 10 is Challenge (auto-handled by ChallengeStep component)
+
+        // Step 11 & 17: NSE vuln scripts
         if (c.includes('--script') && c.includes('vuln') && c.includes('192.168.1.5')) {
-            if (!steps[8].completed) { completeStep(9); return }
-            if (steps[8].completed && !steps[13].completed) { completeStep(14); return }
+            if (!steps[10].completed) { completeStep(11); return }
+            if (steps[10].completed && !steps[16].completed) { completeStep(17); return }
         }
 
-        // Step 10: host discovery ping sweep
-        if (hasFlag('-sn') && (c.includes('192.168.1.0') || c.includes('/24')) && !steps[9].completed) {
-            completeStep(10)
+        // Step 12: host discovery ping sweep
+        if (hasFlag('-sn') && (c.includes('192.168.1.0') || c.includes('/24')) && !steps[11].completed) {
+            completeStep(12)
         }
 
-        // Step 11: Full UDP scan
-        if (hasFlag('-su') && c.includes('-p-') && !steps[10].completed) { completeStep(11); return }
+        // Step 13 is Challenge (auto-handled by ChallengeStep component)
 
-        // Step 12: SNMP Enum
-        if (hasFlag('-su') && hasFlag('-p') && c.includes('161') && c.includes('snmp-brute') && !steps[11].completed) { completeStep(12); return }
+        // Step 14: Full UDP scan
+        if (hasFlag('-su') && c.includes('-p-') && !steps[13].completed) { completeStep(14); return }
 
-        // Step 13: Capture UDP Flag
-        if (c.startsWith('curl') && c.includes('tftp://') && !steps[12].completed) { completeStep(13); return }
+        // Step 15: SNMP Enum
+        if (hasFlag('-su') && hasFlag('-p') && c.includes('161') && c.includes('snmp-brute') && !steps[14].completed) { completeStep(15); return }
 
-        // Step 15: Analyze CVE
-        if (c.startsWith('searchsploit') && c.includes('cve-') && !steps[14].completed) { completeStep(15); return }
+        // Step 16: Capture UDP Flag
+        if (c.startsWith('curl') && c.includes('tftp://') && !steps[15].completed) { completeStep(16); return }
 
-        // Step 16: Submit Vuln
-        if (c.startsWith('submit_flag') && c.includes('vuln_report') && !steps[15].completed) {
-            completeStep(16)
+        // Step 18: Analyze CVE
+        if (c.startsWith('searchsploit') && c.includes('cve-') && !steps[17].completed) { completeStep(18); return }
+
+        // Step 19: Submit Vuln
+        if (c.startsWith('submit_flag') && c.includes('vuln_report') && !steps[18].completed) {
+            completeStep(19)
             setShowCelebration(true)
         }
     }
 
 
     return (
-        <div className="min-h-screen bg-dark-bg flex flex-col">
+        <div className="h-screen bg-dark-bg flex flex-col overflow-hidden">
             <Header />
 
             {/* Top progress bar */}
@@ -185,7 +193,7 @@ export default function Lab02() {
                             {steps.map((step) => {
                                 const isActive = step.id === currentStepId
                                 const isDone = step.completed
-                                const isLocked = !isDone && step.id > (currentStepId ?? totalSteps + 1)
+                                const isChallenge = step.type === 'challenge'
 
                                 return (
                                     <motion.div
@@ -194,123 +202,97 @@ export default function Lab02() {
                                         className={`rounded-xl border p-3 transition-all duration-300 ${isDone
                                             ? 'border-neon-green/40 bg-neon-green/5'
                                             : isActive
-                                                ? 'border-neon-amber/50 bg-neon-amber/5'
+                                                ? isChallenge
+                                                    ? 'border-purple-400/50 bg-purple-400/5'
+                                                    : 'border-neon-amber/50 bg-neon-amber/5'
                                                 : 'border-dark-border bg-dark-card opacity-40'
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
-                                            {/* Icon */}
                                             <div className="flex-shrink-0 mt-0.5">
                                                 {isDone ? (
                                                     <CheckCircle size={16} className="text-neon-green" />
                                                 ) : isActive ? (
-                                                    <motion.div
-                                                        animate={{ scale: [1, 1.2, 1] }}
-                                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                                    >
-                                                        <Loader size={16} className="text-neon-amber" />
-                                                    </motion.div>
+                                                    isChallenge ? (
+                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                                                            <Brain size={16} className="text-purple-400" />
+                                                        </motion.div>
+                                                    ) : (
+                                                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                                                            <Loader size={16} className="text-neon-amber" />
+                                                        </motion.div>
+                                                    )
                                                 ) : (
                                                     <Circle size={16} className="text-gray-700" />
                                                 )}
                                             </div>
-
-                                            {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
-                                                    {/* Tool badge — always terminal */}
-                                                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-neon-green/70 bg-neon-green/10">
-                                                        💻 Terminal
-                                                    </span>
+                                                    {isChallenge ? (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-purple-400/70 bg-purple-400/10">
+                                                            🧠 Challenge
+                                                        </span>
+                                                    ) : (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-neon-green/70 bg-neon-green/10">
+                                                            💻 Terminal
+                                                        </span>
+                                                    )}
                                                 </div>
-
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? 'text-white' : 'text-gray-600'
-                                                        }`}>
+                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? (isChallenge ? 'text-purple-300' : 'text-white') : 'text-gray-600'}`}>
                                                         {step.title}
                                                     </p>
-
-                                                    {/* Review toggle for completed steps */}
                                                     {isDone && (
                                                         <button
-                                                            onClick={() =>
-                                                                setReviewingStepId((p) =>
-                                                                    p === step.id ? null : step.id
-                                                                )
-                                                            }
+                                                            onClick={() => setReviewingStepId((p) => p === step.id ? null : step.id)}
                                                             className="flex items-center gap-1 font-mono text-xs text-neon-green/50 hover:text-neon-green transition-colors ml-2 flex-shrink-0"
-                                                            title="Review this step"
                                                         >
-                                                            <RotateCcw size={11} />
-                                                            {reviewingStepId === step.id
-                                                                ? <ChevronUp size={11} />
-                                                                : <ChevronDown size={11} />
-                                                            }
+                                                            <RotateCcw size={11} />{reviewingStepId === step.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                                                         </button>
                                                     )}
                                                 </div>
 
-                                                {/* Active step detail */}
-                                                <AnimatePresence>
-                                                    {isActive && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">
-                                                                {step.objective}
-                                                            </p>
+                                                {/* Challenge step rendering */}
+                                                {isChallenge && step.challengeData && (
+                                                    <ChallengeStep data={step.challengeData} isActive={isActive} isDone={isDone} onComplete={() => completeStep(step.id)} />
+                                                )}
 
-                                                            {/* Hint box */}
-                                                            <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
-                                                                <span className="font-mono text-xs text-neon-amber/60">
-                                                                    💡 Type in the{' '}
-                                                                    <span className="text-neon-amber">Terminal</span>:
-                                                                </span>
-                                                                <code className="block font-mono text-sm text-neon-green mt-1 break-all">
-                                                                    {step.hint}
-                                                                </code>
-                                                            </div>
-
-                                                            {/* Arabic quip */}
-                                                            <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">
-                                                                {step.quipAr}
-                                                            </p>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-
-                                                {/* Review panel for completed steps */}
-                                                <AnimatePresence>
-                                                    {isDone && reviewingStepId === step.id && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
-                                                                <p className="font-mono text-xs text-gray-400 leading-relaxed">
-                                                                    {step.objective}
-                                                                </p>
-                                                                <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
-                                                                    <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
-                                                                    <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">
-                                                                        {step.hint}
-                                                                    </code>
+                                                {/* Active step detail (non-challenge) */}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isActive && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
+                                                                <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
+                                                                    <span className="font-mono text-xs text-neon-amber/60">💡 Type in the <span className="text-neon-amber">Terminal</span>:</span>
+                                                                    <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
                                                                 </div>
-                                                                <p className="font-cairo text-xs text-neon-green/50 italic">
-                                                                    {step.quipAr}
-                                                                </p>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
+                                                                <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
 
-                                                {isDone && reviewingStepId !== step.id && (
+                                                {/* Review panel */}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isDone && reviewingStepId === step.id && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
+                                                                    <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
+                                                                    <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
+                                                                        <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
+                                                                        <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                                    </div>
+                                                                    <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+
+                                                {isDone && reviewingStepId !== step.id && !isChallenge && (
                                                     <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Complete</p>
                                                 )}
                                             </div>
@@ -366,7 +348,7 @@ export default function Lab02() {
                         >
                             <Terminal size={14} />
                             💻 Terminal
-                            <span className="text-xs opacity-50">steps 1–16</span>
+                            <span className="text-xs opacity-50">steps 1–19</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">
@@ -379,7 +361,7 @@ export default function Lab02() {
                     </div>
 
                     {/* Terminal panel */}
-                    <div className="flex-1 overflow-hidden p-5">
+                    <div className="flex-1 overflow-hidden">
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}

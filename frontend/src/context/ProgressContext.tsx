@@ -65,12 +65,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }, [completedLabs])
 
     const isLabUnlocked = useCallback((labNumber: number) => {
-        if (labNumber === 1) return true          // Lab 01 always unlocked
+        if (labNumber <= 2) return true          // Labs 01 & 02 always unlocked
 
-        // Lab N unlocked if Lab N-1 (base) is complete
-        // Or if not strict, return true. We'll be flexible!
-        return true;
-    }, [])
+        // Labs 3–5: require previous lab to be fully complete
+        const prevSlug = `lab${String(labNumber - 1).padStart(2, '0')}`
+        return completedLabs.includes(prevSlug)
+    }, [completedLabs])
 
     const getCompletedSteps = useCallback((labSlug: string): number[] => {
         return progress[labSlug]?.completed_steps ?? []

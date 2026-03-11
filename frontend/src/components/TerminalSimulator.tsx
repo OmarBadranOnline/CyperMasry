@@ -602,18 +602,7 @@ export default function TerminalSimulator({ currentStepId, onCommandRun }: Props
             className="terminal-window h-full flex flex-col"
             onClick={() => inputRef.current?.focus()}
         >
-            {/* Header bar */}
-            <div className="terminal-header flex-shrink-0">
-                <div className="terminal-dot bg-red-500" />
-                <div className="terminal-dot bg-yellow-400" />
-                <div className="terminal-dot bg-green-500" />
-                <span className="font-mono text-xs text-gray-500 ml-2">
-                    {HOSTNAME}:{CWD} — bash
-                </span>
-                <span className="ml-auto font-mono text-xs text-neon-amber/50 bg-neon-amber/5 px-2 py-0.5 rounded">
-                    SIMULATED
-                </span>
-            </div>
+            {/* Header bar removed to sit flush with tab bar */}
 
             {/* Guided step hint banner */}
             <AnimatePresence>
@@ -672,12 +661,10 @@ export default function TerminalSimulator({ currentStepId, onCommandRun }: Props
                 </div>
 
                 {/* History */}
-                <AnimatePresence initial={false}>
+                <div className="history-container">
                     {history.map((entry, idx) => (
-                        <motion.div
+                        <div
                             key={idx}
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
                             className="mb-3"
                         >
                             {/* Prompt line */}
@@ -738,9 +725,9 @@ export default function TerminalSimulator({ currentStepId, onCommandRun }: Props
                                     )}
                                 </div>
                             )}
-                        </motion.div>
+                        </div>
                     ))}
-                </AnimatePresence>
+                </div>
 
                 {/* Active input line */}
                 <div className="flex items-center gap-1">

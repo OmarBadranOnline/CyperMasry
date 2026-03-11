@@ -4,12 +4,13 @@
  */
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw, Brain } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import FloatingAssistant from '../../components/FloatingAssistant'
 import LabCompletionCelebration from '../../components/LabCompletionCelebration'
+import ChallengeStep from '../../components/ChallengeStep'
 import BannerTerminal from './BannerTerminal'
 import { useMissionProgress } from './useMissionProgress'
 
@@ -32,45 +33,43 @@ export default function Lab05() {
         if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('22') && !steps[1].completed) { completeStep(2); return }
         // Step 3: nc port 21
         if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('21') && !steps[2].completed) { completeStep(3); return }
-        // Step 4: curl -I headers
-        if (c.startsWith('curl') && c.includes('-i') && c.includes('192.168.1.5') && !steps[3].completed) { completeStep(4); return }
-        // Step 5: telnet port 23
-        if (c.startsWith('telnet') && c.includes('192.168.1.5') && c.includes('23') && !steps[4].completed) { completeStep(5); return }
-        // Step 6: searchsploit apache
-        if (c.startsWith('searchsploit') && c.includes('apache') && !steps[5].completed) { completeStep(6); return }
-        // Step 7: searchsploit openssh
-        if (c.startsWith('searchsploit') && (c.includes('openssh') || c.includes('ssh')) && !steps[6].completed) { completeStep(7); return }
-        // Step 8: nc port 25
-        if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('25') && !steps[7].completed) { completeStep(8); return }
-        // Step 9: whatweb
-        if (c.startsWith('whatweb') && !steps[8].completed) { completeStep(9); return }
-        // Step 10: nikto
-        if (c.startsWith('nikto') && c.includes('-h') && !steps[9].completed) { completeStep(10); return }
+        // Step 4 is Challenge (FTP Risks)
+        // Step 5: curl -I headers
+        if (c.startsWith('curl') && c.includes('-i') && c.includes('192.168.1.5') && !steps[4].completed) { completeStep(5); return }
+        // Step 6: telnet port 23
+        if (c.startsWith('telnet') && c.includes('192.168.1.5') && c.includes('23') && !steps[5].completed) { completeStep(6); return }
+        // Step 7: searchsploit apache
+        if (c.startsWith('searchsploit') && c.includes('apache') && !steps[6].completed) { completeStep(7); return }
+        // Step 8: searchsploit openssh
+        if (c.startsWith('searchsploit') && (c.includes('openssh') || c.includes('ssh')) && !steps[7].completed) { completeStep(8); return }
+        // Step 9 is Challenge (CVSS Scores)
+        // Step 10: nc port 25
+        if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('25') && !steps[9].completed) { completeStep(10); return }
+        // Step 11: whatweb
+        if (c.startsWith('whatweb') && !steps[10].completed) { completeStep(11); return }
+        // Step 12: nikto
+        if (c.startsWith('nikto') && c.includes('-h') && !steps[11].completed) { completeStep(12); return }
+        // Step 13 is Challenge (Attack Chain)
 
-        // Step 11: OpenSSH 7.2 Validation
-        if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('22') && steps[1].completed && !steps[10].completed) { completeStep(11); return }
-
-        // Step 12: User Enum Timing
-        if (c.startsWith('python') && c.includes('ssh_enum.py') && !steps[11].completed) { completeStep(12); return }
-
-        // Step 13: Verify Username
-        if (c.startsWith('submit_flag') && c.includes('admin_user') && !steps[12].completed) { completeStep(13); return }
-
-        // Step 14: WhatWeb Scan
-        if (c.startsWith('whatweb') && steps[8].completed && !steps[13].completed) { completeStep(14); return }
-
-        // Step 15: CMS Vuln Scan
-        if (c.startsWith('wpscan') && !steps[14].completed) { completeStep(15); return }
-
-        // Step 16: Submit Stack Vulns
-        if (c.startsWith('submit_flag') && c.includes('wp_cve_detected') && !steps[15].completed) {
-            completeStep(16)
+        // Step 14: OpenSSH 7.2 Validation
+        if ((c.startsWith('nc ') || c.startsWith('netcat ')) && c.includes('192.168.1.5') && c.includes('22') && steps[1].completed && !steps[13].completed) { completeStep(14); return }
+        // Step 15: User Enum Timing
+        if (c.startsWith('python') && c.includes('ssh_enum.py') && !steps[14].completed) { completeStep(15); return }
+        // Step 16: Verify Username
+        if (c.startsWith('submit_flag') && c.includes('admin_user') && !steps[15].completed) { completeStep(16); return }
+        // Step 17: WhatWeb Scan
+        if (c.startsWith('whatweb') && steps[10].completed && !steps[16].completed) { completeStep(17); return }
+        // Step 18: CMS Vuln Scan
+        if (c.startsWith('wpscan') && !steps[17].completed) { completeStep(18); return }
+        // Step 19: Submit Stack Vulns
+        if (c.startsWith('submit_flag') && c.includes('wp_cve_detected') && !steps[18].completed) {
+            completeStep(19)
             setShowCelebration(true)
         }
     }
 
     return (
-        <div className="min-h-screen bg-dark-bg flex flex-col">
+        <div className="h-screen bg-dark-bg flex flex-col overflow-hidden">
             <Header />
             <div className="fixed top-16 left-0 right-0 z-40 h-1 bg-dark-border">
                 <motion.div className="h-full bg-neon-amber" animate={{ width: `${progressPct}%` }} transition={{ duration: 0.5, ease: 'easeOut' }} style={{ boxShadow: '0 0 8px #FFBF00' }} />
@@ -109,21 +108,27 @@ export default function Lab05() {
                             {steps.map((step) => {
                                 const isActive = step.id === currentStepId
                                 const isDone = step.completed
+                                const isChallenge = step.type === 'challenge'
                                 return (
-                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? 'border-neon-amber/50 bg-neon-amber/5' : 'border-dark-border bg-dark-card opacity-40'}`}>
+                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? (isChallenge ? 'border-purple-400/50 bg-purple-400/5' : 'border-neon-amber/50 bg-neon-amber/5') : 'border-dark-border bg-dark-card opacity-40'}`}>
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0 mt-0.5">
                                                 {isDone ? <CheckCircle size={16} className="text-neon-green" /> : isActive ? (
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
+                                                    isChallenge ? <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Brain size={16} className="text-purple-400" /></motion.div>
+                                                    : <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
                                                 ) : <Circle size={16} className="text-gray-700" />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
-                                                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-blue-400/70 bg-blue-400/10">🏷️ Banner</span>
+                                                    {isChallenge ? (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-purple-400/70 bg-purple-400/10">🧠 Challenge</span>
+                                                    ) : (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-blue-400/70 bg-blue-400/10">🏷️ Banner</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? 'text-white' : 'text-gray-600'}`}>{step.title}</p>
+                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? (isChallenge ? 'text-purple-300' : 'text-white') : 'text-gray-600'}`}>{step.title}</p>
                                                     {isDone && (
                                                         <button onClick={() => setReviewingStepId((p) => p === step.id ? null : step.id)}
                                                             className="flex items-center gap-1 font-mono text-xs text-neon-green/50 hover:text-neon-green transition-colors ml-2 flex-shrink-0">
@@ -131,33 +136,40 @@ export default function Lab05() {
                                                         </button>
                                                     )}
                                                 </div>
-                                                <AnimatePresence>
-                                                    {isActive && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
-                                                            <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
-                                                                <span className="font-mono text-xs text-neon-amber/60">💡 Type in the <span className="text-neon-amber">Terminal</span>:</span>
-                                                                <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
-                                                            </div>
-                                                            <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                <AnimatePresence>
-                                                    {isDone && reviewingStepId === step.id && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
-                                                                <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
-                                                                <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
-                                                                    <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
-                                                                    <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                {isChallenge && step.challengeData && (
+                                                    <ChallengeStep data={step.challengeData} isActive={isActive} isDone={isDone} onComplete={() => completeStep(step.id)} />
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isActive && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
+                                                                <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
+                                                                    <span className="font-mono text-xs text-neon-amber/60">💡 Type in the <span className="text-neon-amber">Terminal</span>:</span>
+                                                                    <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
                                                                 </div>
-                                                                <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                {isDone && reviewingStepId !== step.id && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Banner grabbed</p>}
+                                                                <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isDone && reviewingStepId === step.id && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
+                                                                    <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
+                                                                    <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
+                                                                        <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
+                                                                        <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                                    </div>
+                                                                    <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {isDone && reviewingStepId !== step.id && !isChallenge && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Banner grabbed</p>}
                                             </div>
                                         </div>
                                     </motion.div>
@@ -189,14 +201,14 @@ export default function Lab05() {
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         <div className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5">
                             <Terminal size={14} />🏷️ Banner Terminal
-                            <span className="text-xs opacity-50">16 steps</span>
+                            <span className="text-xs opacity-50">19 steps</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">{completedCount}/{totalSteps} done</span>
                             <span className="font-mono text-xs text-gray-700 bg-dark-card border border-dark-border/50 px-3 py-1 rounded-full">⚠ Simulated</span>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-hidden p-5">
+                    <div className="flex-1 overflow-hidden">
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full">
                             <BannerTerminal currentStepId={currentStepId} onCommandRun={handleCommandRun} />
                         </motion.div>

@@ -482,15 +482,7 @@ export default function SQLiTerminal({ currentStepId, onCommandRun }: Props) {
 
     return (
         <div className="terminal-window h-full flex flex-col" onClick={() => inputRef.current?.focus()}>
-            <div className="terminal-header flex-shrink-0">
-                <div className="terminal-dot bg-red-500" />
-                <div className="terminal-dot bg-yellow-400" />
-                <div className="terminal-dot bg-green-500" />
-                <span className="font-mono text-xs text-gray-500 ml-2">{HOSTNAME}:{CWD} — bash</span>
-                <span className="ml-auto flex items-center gap-1 font-mono text-xs text-red-400/70 bg-red-400/10 px-2 py-0.5 rounded">
-                    <AlertTriangle size={10} /> SIMULATED
-                </span>
-            </div>
+            {/* Header bar removed to sit flush with tab bar */}
 
             <AnimatePresence>
                 {stepHint && (
@@ -517,9 +509,9 @@ export default function SQLiTerminal({ currentStepId, onCommandRun }: Props) {
                     <div className="font-cairo text-xs text-gray-600 italic">تعلّم SQLi بالتجربة المباشرة — بأمان تام! 💉</div>
                 </div>
 
-                <AnimatePresence initial={false}>
+                <div className="history-container">
                     {history.map((entry, idx) => (
-                        <motion.div key={idx} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="mb-3">
+                        <div key={idx} className="mb-3">
                             <div className="flex items-center gap-1 flex-wrap">
                                 <span className="neon-text-green font-mono text-xs">{PROMPT}</span>
                                 <span className="text-neon-amber font-mono text-xs ml-1 break-all">{entry.input}</span>
@@ -556,9 +548,9 @@ export default function SQLiTerminal({ currentStepId, onCommandRun }: Props) {
                                     )}
                                 </div>
                             )}
-                        </motion.div>
+                        </div>
                     ))}
-                </AnimatePresence>
+                </div>
 
                 <div className="flex items-center gap-1">
                     <span className="neon-text-green font-mono text-xs flex-shrink-0">{PROMPT}</span>

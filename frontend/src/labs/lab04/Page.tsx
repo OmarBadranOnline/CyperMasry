@@ -4,12 +4,13 @@
  */
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw, Brain } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import FloatingAssistant from '../../components/FloatingAssistant'
 import LabCompletionCelebration from '../../components/LabCompletionCelebration'
+import ChallengeStep from '../../components/ChallengeStep'
 import SQLiTerminal from './SQLiTerminal'
 import { useMissionProgress } from './useMissionProgress'
 
@@ -32,45 +33,43 @@ export default function Lab04() {
         if ((c.includes("or '1'='1") || c.includes('or 1=1')) && !steps[1].completed) { completeStep(2); return }
         // Step 3: comment bypass admin'--
         if (c.includes("admin'--") && !steps[2].completed) { completeStep(3); return }
-        // Step 4: ORDER BY
-        if (c.includes('order by') && !steps[3].completed) { completeStep(4); return }
-        // Step 5: UNION SELECT version
-        if (c.includes('union select') && c.includes('version()') && !steps[4].completed) { completeStep(5); return }
-        // Step 6: information_schema
-        if (c.includes('information_schema.tables') && !steps[5].completed) { completeStep(6); return }
-        // Step 7: dump users with concat
-        if (c.includes('from users') && c.includes('concat') && !steps[6].completed) { completeStep(7); return }
-        // Step 8: length(password)
-        if (c.includes('length(password)') && !steps[7].completed) { completeStep(8); return }
-        // Step 9: LOAD_FILE
-        if (c.includes('load_file') && !steps[8].completed) { completeStep(9); return }
-        // Step 10: INTO OUTFILE web shell
-        if (c.includes('into outfile') && c.includes('shell.php') && !steps[9].completed) { completeStep(10); return }
+        // Step 4 is Challenge (SQL Comments)
+        // Step 5: ORDER BY
+        if (c.includes('order by') && !steps[4].completed) { completeStep(5); return }
+        // Step 6: UNION SELECT version
+        if (c.includes('union select') && c.includes('version()') && !steps[5].completed) { completeStep(6); return }
+        // Step 7: information_schema
+        if (c.includes('information_schema.tables') && !steps[6].completed) { completeStep(7); return }
+        // Step 8: dump users with concat
+        if (c.includes('from users') && c.includes('concat') && !steps[7].completed) { completeStep(8); return }
+        // Step 9 is Challenge (UNION SELECT)
+        // Step 10: length(password)
+        if (c.includes('length(password)') && !steps[9].completed) { completeStep(10); return }
+        // Step 11: LOAD_FILE
+        if (c.includes('load_file') && !steps[10].completed) { completeStep(11); return }
+        // Step 12: INTO OUTFILE web shell
+        if (c.includes('into outfile') && c.includes('shell.php') && !steps[11].completed) { completeStep(12); return }
+        // Step 13 is Challenge (SQLi Defense)
 
-        // Step 11: Sleep Injection
-        if (c.includes('sleep') && !steps[10].completed) { completeStep(11); return }
-
-        // Step 12: Binary Search DB
-        if ((c.includes('ascii') || c.includes('substring')) && c.includes('sleep') && !steps[11].completed) { completeStep(12); return }
-
-        // Step 13: Password Recovered
-        if (c.startsWith('submit_flag') && c.includes('5c3r3tp4ss') && !steps[12].completed) { completeStep(13); return }
-
-        // Step 14: Account Profile Injection
-        if (c.startsWith('update_profile') && c.includes("admin'--") && !steps[13].completed) { completeStep(14); return }
-
-        // Step 15: Wait for Admin
-        if (c.startsWith('wait') && !steps[14].completed) { completeStep(15); return }
-
-        // Step 16: Extract Delayed Payload
-        if (c.startsWith('submit_flag') && c.includes('2nd_order_win') && !steps[15].completed) {
-            completeStep(16)
+        // Step 14: Sleep Injection
+        if (c.includes('sleep') && !steps[13].completed) { completeStep(14); return }
+        // Step 15: Binary Search DB
+        if ((c.includes('ascii') || c.includes('substring')) && c.includes('sleep') && !steps[14].completed) { completeStep(15); return }
+        // Step 16: Password Recovered
+        if (c.startsWith('submit_flag') && c.includes('5c3r3tp4ss') && !steps[15].completed) { completeStep(16); return }
+        // Step 17: Account Profile Injection
+        if (c.startsWith('update_profile') && c.includes("admin'--") && !steps[16].completed) { completeStep(17); return }
+        // Step 18: Wait for Admin
+        if (c.startsWith('wait') && !steps[17].completed) { completeStep(18); return }
+        // Step 19: Extract Delayed Payload
+        if (c.startsWith('submit_flag') && c.includes('2nd_order_win') && !steps[18].completed) {
+            completeStep(19)
             setShowCelebration(true)
         }
     }
 
     return (
-        <div className="min-h-screen bg-dark-bg flex flex-col">
+        <div className="h-screen bg-dark-bg flex flex-col overflow-hidden">
             <Header />
             <div className="fixed top-16 left-0 right-0 z-40 h-1 bg-dark-border">
                 <motion.div className="h-full bg-neon-amber" animate={{ width: `${progressPct}%` }} transition={{ duration: 0.5, ease: 'easeOut' }} style={{ boxShadow: '0 0 8px #FFBF00' }} />
@@ -109,21 +108,27 @@ export default function Lab04() {
                             {steps.map((step) => {
                                 const isActive = step.id === currentStepId
                                 const isDone = step.completed
+                                const isChallenge = step.type === 'challenge'
                                 return (
-                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? 'border-neon-amber/50 bg-neon-amber/5' : 'border-dark-border bg-dark-card opacity-40'}`}>
+                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? (isChallenge ? 'border-purple-400/50 bg-purple-400/5' : 'border-neon-amber/50 bg-neon-amber/5') : 'border-dark-border bg-dark-card opacity-40'}`}>
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0 mt-0.5">
                                                 {isDone ? <CheckCircle size={16} className="text-neon-green" /> : isActive ? (
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
+                                                    isChallenge ? <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Brain size={16} className="text-purple-400" /></motion.div>
+                                                    : <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
                                                 ) : <Circle size={16} className="text-gray-700" />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
-                                                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-red-400/70 bg-red-400/10">💉 SQLi Lab</span>
+                                                    {isChallenge ? (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-purple-400/70 bg-purple-400/10">🧠 Challenge</span>
+                                                    ) : (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-red-400/70 bg-red-400/10">💉 SQLi Lab</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? 'text-white' : 'text-gray-600'}`}>{step.title}</p>
+                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? (isChallenge ? 'text-purple-300' : 'text-white') : 'text-gray-600'}`}>{step.title}</p>
                                                     {isDone && (
                                                         <button onClick={() => setReviewingStepId((p) => p === step.id ? null : step.id)}
                                                             className="flex items-center gap-1 font-mono text-xs text-neon-green/50 hover:text-neon-green transition-colors ml-2 flex-shrink-0">
@@ -131,33 +136,40 @@ export default function Lab04() {
                                                         </button>
                                                     )}
                                                 </div>
-                                                <AnimatePresence>
-                                                    {isActive && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
-                                                            <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
-                                                                <span className="font-mono text-xs text-neon-amber/60">💡 Payload to inject:</span>
-                                                                <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
-                                                            </div>
-                                                            <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                <AnimatePresence>
-                                                    {isDone && reviewingStepId === step.id && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
-                                                                <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
-                                                                <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
-                                                                    <span className="font-mono text-xs text-neon-green/50">✓ Payload used:</span>
-                                                                    <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                {isChallenge && step.challengeData && (
+                                                    <ChallengeStep data={step.challengeData} isActive={isActive} isDone={isDone} onComplete={() => completeStep(step.id)} />
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isActive && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
+                                                                <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
+                                                                    <span className="font-mono text-xs text-neon-amber/60">💡 Payload to inject:</span>
+                                                                    <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
                                                                 </div>
-                                                                <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                {isDone && reviewingStepId !== step.id && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Injected</p>}
+                                                                <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isDone && reviewingStepId === step.id && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
+                                                                    <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
+                                                                    <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
+                                                                        <span className="font-mono text-xs text-neon-green/50">✓ Payload used:</span>
+                                                                        <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                                    </div>
+                                                                    <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {isDone && reviewingStepId !== step.id && !isChallenge && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Injected</p>}
                                             </div>
                                         </div>
                                     </motion.div>
@@ -190,14 +202,14 @@ export default function Lab04() {
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         <div className="flex items-center gap-2 px-6 py-3 font-mono text-sm border-b-2 border-neon-amber text-neon-amber bg-neon-amber/5">
                             <Terminal size={14} />💉 SQLi Terminal
-                            <span className="text-xs opacity-50">16 steps</span>
+                            <span className="text-xs opacity-50">19 steps</span>
                         </div>
                         <div className="ml-auto flex items-center pr-4 gap-2">
                             <span className="font-mono text-xs text-neon-amber/60">{completedCount}/{totalSteps} done</span>
                             <span className="font-mono text-xs text-red-400/60 bg-red-400/10 border border-red-400/20 px-3 py-1 rounded-full">⚠ Simulated</span>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-hidden p-5">
+                    <div className="flex-1 overflow-hidden">
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full">
                             <SQLiTerminal currentStepId={currentStepId} onCommandRun={handleCommandRun} />
                         </motion.div>

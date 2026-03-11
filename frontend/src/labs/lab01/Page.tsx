@@ -13,6 +13,7 @@ import {
     ChevronDown,
     ChevronUp,
     RotateCcw,
+    Brain,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
@@ -21,6 +22,7 @@ import ZoogleSearch from './ZoogleSearch'
 import TerminalSimulator from '../../components/TerminalSimulator'
 import FakeLinkedIn from './FakeLinkedIn'
 import FloatingAssistant from '../../components/FloatingAssistant'
+import ChallengeStep from '../../components/ChallengeStep'
 import { useMissionProgress } from './useMissionProgress'
 
 type ActiveTab = 'zoogle' | 'terminal' | 'linkedin'
@@ -51,7 +53,7 @@ export default function Lab01Page() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-bg flex flex-col">
+        <div className="h-screen bg-dark-bg flex flex-col overflow-hidden">
             <Header />
 
             {/* Top progress bar */}
@@ -131,6 +133,7 @@ export default function Lab01Page() {
                                 const isActive = step.id === currentStepId
                                 const isDone = step.completed
                                 const isLocked = !isDone && step.id > (currentStepId ?? totalSteps + 1)
+                                const isChallenge = step.type === 'challenge'
 
                                 return (
                                     <motion.div
@@ -139,7 +142,9 @@ export default function Lab01Page() {
                                         className={`rounded-xl border p-3 transition-all duration-300 ${isDone
                                             ? 'border-neon-green/40 bg-neon-green/5'
                                             : isActive
-                                                ? 'border-neon-amber/50 bg-neon-amber/5'
+                                                ? isChallenge
+                                                    ? 'border-purple-400/50 bg-purple-400/5'
+                                                    : 'border-neon-amber/50 bg-neon-amber/5'
                                                 : 'border-dark-border bg-dark-card opacity-40'
                                             }`}
                                     >
@@ -149,12 +154,21 @@ export default function Lab01Page() {
                                                 {isDone ? (
                                                     <CheckCircle size={16} className="text-neon-green" />
                                                 ) : isActive ? (
-                                                    <motion.div
-                                                        animate={{ scale: [1, 1.2, 1] }}
-                                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                                    >
-                                                        <Loader size={16} className="text-neon-amber" />
-                                                    </motion.div>
+                                                    isChallenge ? (
+                                                        <motion.div
+                                                            animate={{ scale: [1, 1.2, 1] }}
+                                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                                        >
+                                                            <Brain size={16} className="text-purple-400" />
+                                                        </motion.div>
+                                                    ) : (
+                                                        <motion.div
+                                                            animate={{ scale: [1, 1.2, 1] }}
+                                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                                        >
+                                                            <Loader size={16} className="text-neon-amber" />
+                                                        </motion.div>
+                                                    )
                                                 ) : (
                                                     <Circle size={16} className="text-gray-700" />
                                                 )}
@@ -165,20 +179,26 @@ export default function Lab01Page() {
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
                                                     {/* Tool badge */}
-                                                    <span
-                                                        className={`font-mono text-xs px-1.5 py-0.5 rounded-full ${step.tool === 'terminal'
-                                                            ? 'text-neon-green/70 bg-neon-green/10'
-                                                            : step.tool === 'linkedin'
-                                                                ? 'text-blue-400/70 bg-blue-400/10'
-                                                                : 'text-neon-amber/70 bg-neon-amber/10'
-                                                            }`}
-                                                    >
-                                                        {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'}
-                                                    </span>
+                                                    {isChallenge ? (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-purple-400/70 bg-purple-400/10">
+                                                            🧠 Challenge
+                                                        </span>
+                                                    ) : (
+                                                        <span
+                                                            className={`font-mono text-xs px-1.5 py-0.5 rounded-full ${step.tool === 'terminal'
+                                                                ? 'text-neon-green/70 bg-neon-green/10'
+                                                                : step.tool === 'linkedin'
+                                                                    ? 'text-blue-400/70 bg-blue-400/10'
+                                                                    : 'text-neon-amber/70 bg-neon-amber/10'
+                                                                }`}
+                                                        >
+                                                            {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'}
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? 'text-white' : 'text-gray-600'
+                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? (isChallenge ? 'text-purple-300' : 'text-white') : 'text-gray-600'
                                                         }`}>
                                                         {step.title}
                                                     </p>
@@ -200,90 +220,104 @@ export default function Lab01Page() {
                                                     )}
                                                 </div>
 
-                                                {/* Active step detail */}
-                                                <AnimatePresence>
-                                                    {isActive && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">
-                                                                {step.objective}
-                                                            </p>
+                                                {/* Challenge step rendering */}
+                                                {isChallenge && step.challengeData && (
+                                                    <ChallengeStep
+                                                        data={step.challengeData}
+                                                        isActive={isActive}
+                                                        isDone={isDone}
+                                                        onComplete={() => completeStep(step.id)}
+                                                    />
+                                                )}
 
-                                                            {/* Hint box */}
-                                                            <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
-                                                                <span className="font-mono text-xs text-neon-amber/60">
-                                                                    💡 Type in the{' '}
-                                                                    <span
-                                                                        className="text-neon-amber underline cursor-pointer"
-                                                                        onClick={() => switchToTool(step.tool)}
-                                                                    >
-                                                                        {step.tool === 'terminal' ? 'Terminal' : step.tool === 'linkedin' ? 'LinkedIn' : 'Zoogle'}
-                                                                    </span>:
-                                                                </span>
-                                                                <code className="block font-mono text-sm text-neon-green mt-1 break-all">
-                                                                    {step.hint}
-                                                                </code>
-                                                            </div>
-
-                                                            {/* Arabic quip */}
-                                                            <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">
-                                                                {step.quipAr}
-                                                            </p>
-
-                                                            {/* Switch tab button */}
-                                                            {step.tool !== activeTab && (
-                                                                <button
-                                                                    onClick={() => switchToTool(step.tool)}
-                                                                    className="mt-2 w-full font-mono text-xs bg-neon-amber/10 border border-neon-amber/30 text-neon-amber py-1.5 rounded-lg hover:bg-neon-amber/20 transition-all"
-                                                                >
-                                                                    Switch to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
-                                                                </button>
-                                                            )}
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-
-                                                {/* ── Review panel for completed steps ── */}
-                                                <AnimatePresence>
-                                                    {isDone && reviewingStepId === step.id && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: 'auto', opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
-                                                                <p className="font-mono text-xs text-gray-400 leading-relaxed">
+                                                {/* Active step detail (non-challenge) */}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isActive && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">
                                                                     {step.objective}
                                                                 </p>
-                                                                <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
-                                                                    <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
-                                                                    <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">
+
+                                                                {/* Hint box */}
+                                                                <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
+                                                                    <span className="font-mono text-xs text-neon-amber/60">
+                                                                        💡 Type in the{' '}
+                                                                        <span
+                                                                            className="text-neon-amber underline cursor-pointer"
+                                                                            onClick={() => switchToTool(step.tool)}
+                                                                        >
+                                                                            {step.tool === 'terminal' ? 'Terminal' : step.tool === 'linkedin' ? 'LinkedIn' : 'Zoogle'}
+                                                                        </span>:
+                                                                    </span>
+                                                                    <code className="block font-mono text-sm text-neon-green mt-1 break-all">
                                                                         {step.hint}
                                                                     </code>
                                                                 </div>
-                                                                <p className="font-cairo text-xs text-neon-green/50 italic">
+
+                                                                {/* Arabic quip */}
+                                                                <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">
                                                                     {step.quipAr}
                                                                 </p>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        switchToTool(step.tool)
-                                                                        setReviewingStepId(null)
-                                                                    }}
-                                                                    className="w-full font-mono text-xs bg-neon-green/5 border border-neon-green/20 text-neon-green/60 py-1.5 rounded-lg hover:bg-neon-green/10 transition-all"
-                                                                >
-                                                                    Go to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
-                                                                </button>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
 
-                                                {isDone && reviewingStepId !== step.id && (
+                                                                {/* Switch tab button */}
+                                                                {step.tool !== activeTab && (
+                                                                    <button
+                                                                        onClick={() => switchToTool(step.tool)}
+                                                                        className="mt-2 w-full font-mono text-xs bg-neon-amber/10 border border-neon-amber/30 text-neon-amber py-1.5 rounded-lg hover:bg-neon-amber/20 transition-all"
+                                                                    >
+                                                                        Switch to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
+                                                                    </button>
+                                                                )}
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+
+                                                {/* ── Review panel for completed steps ── */}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isDone && reviewingStepId === step.id && (
+                                                            <motion.div
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0 }}
+                                                                className="overflow-hidden"
+                                                            >
+                                                                <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
+                                                                    <p className="font-mono text-xs text-gray-400 leading-relaxed">
+                                                                        {step.objective}
+                                                                    </p>
+                                                                    <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
+                                                                        <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
+                                                                        <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">
+                                                                            {step.hint}
+                                                                        </code>
+                                                                    </div>
+                                                                    <p className="font-cairo text-xs text-neon-green/50 italic">
+                                                                        {step.quipAr}
+                                                                    </p>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            switchToTool(step.tool)
+                                                                            setReviewingStepId(null)
+                                                                        }}
+                                                                        className="w-full font-mono text-xs bg-neon-green/5 border border-neon-green/20 text-neon-green/60 py-1.5 rounded-lg hover:bg-neon-green/10 transition-all"
+                                                                    >
+                                                                        Go to {step.tool === 'terminal' ? '💻 Terminal' : step.tool === 'linkedin' ? '🔎 LinkedIn' : '🔍 Zoogle'} →
+                                                                    </button>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+
+                                                {isDone && reviewingStepId !== step.id && !isChallenge && (
                                                     <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Complete</p>
                                                 )}
                                             </div>
@@ -335,9 +369,9 @@ export default function Lab01Page() {
                     {/* Tabs */}
                     <div className="flex border-b border-dark-border bg-dark-bg flex-shrink-0">
                         {[
-                            { id: 'terminal' as ActiveTab, label: '💻 Terminal', steps: '1–4, 10–11, 13–17' },
-                            { id: 'linkedin' as ActiveTab, label: '🔎 LinkedIn', steps: '5' },
-                            { id: 'zoogle' as ActiveTab, label: '🔍 Zoogle', steps: '6–9, 12' },
+                            { id: 'terminal' as ActiveTab, label: '💻 Terminal', steps: '1–4, 12–13, 15, 17–20' },
+                            { id: 'linkedin' as ActiveTab, label: '🔎 LinkedIn', steps: '6' },
+                            { id: 'zoogle' as ActiveTab, label: '🔍 Zoogle', steps: '7–10, 14' },
                         ].map(({ id, label, steps: s }) => (
                             <button
                                 key={id}
@@ -362,7 +396,7 @@ export default function Lab01Page() {
                     </div>
 
                     {/* Tab Content */}
-                    <div className="flex-1 overflow-hidden p-5 relative">
+                    <div className="flex-1 overflow-hidden relative">
                         {/* Terminal Tab */}
                         <div className={`h-full absolute inset-0 p-5 ${activeTab === 'terminal' ? 'block' : 'hidden'}`}>
                             <TerminalSimulator
@@ -376,21 +410,21 @@ export default function Lab01Page() {
                                     } else if (c.startsWith('nslookup')) {
                                         completeStep(3)
                                     } else if (c.startsWith('curl') && c.includes('blacklist-check')) {
-                                        completeStep(11)
-                                    } else if (c.startsWith('curl') && c.includes('dev.evilcorp.com/flag')) {
                                         completeStep(13)
-                                    } else if (c.startsWith('curl') && c.includes('haveibeenpwned')) {
+                                    } else if (c.startsWith('curl') && c.includes('dev.evilcorp.com/flag')) {
                                         completeStep(15)
+                                    } else if (c.startsWith('curl') && c.includes('haveibeenpwned')) {
+                                        completeStep(18)
                                     } else if (c.startsWith('curl')) {
                                         completeStep(4)
                                     } else if (c.startsWith('dig')) {
-                                        completeStep(10)
+                                        completeStep(12)
                                     } else if (c.startsWith('theharvester')) {
-                                        completeStep(14)
-                                    } else if (c.startsWith('hash-identifier')) {
-                                        completeStep(16)
-                                    } else if (c.startsWith('submit_flag') && c.includes('intel_complete')) {
                                         completeStep(17)
+                                    } else if (c.startsWith('hash-identifier')) {
+                                        completeStep(19)
+                                    } else if (c.startsWith('submit_flag') && c.includes('intel_complete')) {
+                                        completeStep(20)
                                     }
                                 }}
                             />
@@ -398,7 +432,7 @@ export default function Lab01Page() {
 
                         {/* LinkedIn Tab */}
                         <div className={`h-full absolute inset-0 p-5 ${activeTab === 'linkedin' ? 'block' : 'hidden'}`}>
-                            <FakeLinkedIn onPetNameFound={() => completeStep(5)} />
+                            <FakeLinkedIn onPetNameFound={() => completeStep(6)} />
                         </div>
 
                         {/* Zoogle Tab */}
@@ -408,16 +442,16 @@ export default function Lab01Page() {
                                 onSearchRun={(query) => {
                                     const q = query.trim().toLowerCase()
                                     if (q.includes('site:crt.sh')) {
-                                        completeStep(12)
+                                        completeStep(14)
                                     } else if (q.includes('site:evilcorp.com') && q.includes('inurl:admin')) {
-                                        completeStep(8)
+                                        completeStep(9)
                                     } else if (q.includes('site:evilcorp.com')) {
-                                        completeStep(7)
+                                        completeStep(8)
                                     } else if (q.includes('admin') || q.includes('login')) {
-                                        completeStep(6)
+                                        completeStep(7)
                                     }
                                 }}
-                                onFlagCaptured={() => completeStep(9)}
+                                onFlagCaptured={() => completeStep(10)}
                             />
                         </div>
                     </div>

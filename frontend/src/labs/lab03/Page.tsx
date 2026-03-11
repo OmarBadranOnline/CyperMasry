@@ -4,12 +4,13 @@
  */
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { BookOpen, Terminal, ChevronLeft, CheckCircle, Circle, Loader, Trophy, Zap, ChevronDown, ChevronUp, RotateCcw, Brain } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import FloatingAssistant from '../../components/FloatingAssistant'
 import LabCompletionCelebration from '../../components/LabCompletionCelebration'
+import ChallengeStep from '../../components/ChallengeStep'
 import BusterTerminal from './BusterTerminal'
 import { useMissionProgress } from './useMissionProgress'
 
@@ -34,43 +35,41 @@ export default function Lab03() {
         if (c.includes('gobuster dir') && c.includes('admin') && c.includes('192.168.1.5') && !steps[2].completed) { completeStep(3); return }
         // Step 4: verbose -v
         if (c.includes('gobuster dir') && c.includes('-v') && c.includes('192.168.1.5') && !c.includes('-t') && !c.includes('--delay') && !c.includes('-o') && !steps[3].completed) { completeStep(4); return }
-        // Step 5: threads -t
-        if (c.includes('gobuster dir') && c.includes('-t') && c.includes('192.168.1.5') && !steps[4].completed) { completeStep(5); return }
-        // Step 6: DNS subdomain
-        if (c.includes('gobuster dns') && !steps[5].completed) { completeStep(6); return }
-        // Step 7: API endpoints
-        if (c.includes('gobuster dir') && c.includes('/api') && !steps[6].completed) { completeStep(7); return }
-        // Step 8: backup extensions
-        if (c.includes('gobuster dir') && c.includes('-x') && c.includes('bak') && !steps[7].completed) { completeStep(8); return }
-        // Step 9: delay stealth
-        if (c.includes('gobuster dir') && c.includes('--delay') && !steps[8].completed) { completeStep(9); return }
-        // Step 10: output to file
-        if (c.includes('gobuster dir') && c.includes('-o') && !steps[9].completed) { completeStep(10); return }
+        // Step 5 is Challenge
+        // Step 6: threads -t
+        if (c.includes('gobuster dir') && c.includes('-t') && c.includes('192.168.1.5') && !steps[5].completed) { completeStep(6); return }
+        // Step 7: DNS subdomain
+        if (c.includes('gobuster dns') && !steps[6].completed) { completeStep(7); return }
+        // Step 8: API endpoints
+        if (c.includes('gobuster dir') && c.includes('/api') && !c.includes('api.txt') && !steps[7].completed) { completeStep(8); return }
+        // Step 9 is Challenge
+        // Step 10: backup extensions
+        if (c.includes('gobuster dir') && c.includes('-x') && c.includes('bak') && !steps[9].completed) { completeStep(10); return }
+        // Step 11: delay stealth
+        if (c.includes('gobuster dir') && c.includes('--delay') && !steps[10].completed) { completeStep(11); return }
+        // Step 12: output to file
+        if (c.includes('gobuster dir') && c.includes('-o') && !steps[11].completed) { completeStep(12); return }
+        // Step 13 is Challenge
 
-        // Step 11: Extra: Fuzz API versions
-        if (c.includes('gobuster dir') && c.includes('/api') && c.includes('api.txt') && !steps[10].completed) { completeStep(11); return }
-
-        // Step 12: Extra: Check /v2/ leaked data
-        if (c.startsWith('curl') && c.includes('/api/v2/users') && !steps[11].completed) { completeStep(12); return }
-
-        // Step 13: Extra: Extract JSON payload
-        if (c.startsWith('curl') && c.includes('/api/v2/users') && c.includes('|') && c.includes('jq') && !steps[12].completed) { completeStep(13); return }
-
-        // Step 14: Extra: VHost Fuzzing
-        if (c.includes('gobuster vhost') && !steps[13].completed) { completeStep(14); return }
-
-        // Step 15: Extra: Target VHost
-        if (c.startsWith('curl') && c.includes('-h') && c.includes('dev.evilcorp.local') && !steps[14].completed) { completeStep(15); return }
-
-        // Step 16: Extra: Access Platform Flag
-        if (c.startsWith('submit_flag') && c.includes('vhost_dev') && !steps[15].completed) {
-            completeStep(16);
+        // Step 14: Extra: Fuzz API versions
+        if (c.includes('gobuster dir') && c.includes('/api') && c.includes('api.txt') && !steps[13].completed) { completeStep(14); return }
+        // Step 15: Extra: Check /v2/ leaked data
+        if (c.startsWith('curl') && c.includes('/api/v2/users') && !c.includes('jq') && !steps[14].completed) { completeStep(15); return }
+        // Step 16: Extra: Extract JSON payload
+        if (c.startsWith('curl') && c.includes('/api/v2/users') && c.includes('jq') && !steps[15].completed) { completeStep(16); return }
+        // Step 17: Extra: VHost Fuzzing
+        if (c.includes('gobuster vhost') && !steps[16].completed) { completeStep(17); return }
+        // Step 18: Extra: Target VHost
+        if (c.startsWith('curl') && c.includes('-h') && c.includes('dev.evilcorp.local') && !steps[17].completed) { completeStep(18); return }
+        // Step 19: Extra: Access Platform Flag
+        if (c.startsWith('submit_flag') && c.includes('vhost_dev') && !steps[18].completed) {
+            completeStep(19);
             setShowCelebration(true)
         }
     }
 
     return (
-        <div className="min-h-screen bg-dark-bg flex flex-col">
+        <div className="h-screen bg-dark-bg flex flex-col overflow-hidden">
             <Header />
             <div className="fixed top-16 left-0 right-0 z-40 h-1 bg-dark-border">
                 <motion.div className="h-full bg-neon-amber" animate={{ width: `${progressPct}%` }} transition={{ duration: 0.5, ease: 'easeOut' }} style={{ boxShadow: '0 0 8px #FFBF00' }} />
@@ -110,21 +109,27 @@ export default function Lab03() {
                             {steps.map((step) => {
                                 const isActive = step.id === currentStepId
                                 const isDone = step.completed
+                                const isChallenge = step.type === 'challenge'
                                 return (
-                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? 'border-neon-amber/50 bg-neon-amber/5' : 'border-dark-border bg-dark-card opacity-40'}`}>
+                                    <motion.div key={step.id} layout className={`rounded-xl border p-3 transition-all duration-300 ${isDone ? 'border-neon-green/40 bg-neon-green/5' : isActive ? (isChallenge ? 'border-purple-400/50 bg-purple-400/5' : 'border-neon-amber/50 bg-neon-amber/5') : 'border-dark-border bg-dark-card opacity-40'}`}>
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0 mt-0.5">
                                                 {isDone ? <CheckCircle size={16} className="text-neon-green" /> : isActive ? (
-                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
+                                                    isChallenge ? <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Brain size={16} className="text-purple-400" /></motion.div>
+                                                    : <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}><Loader size={16} className="text-neon-amber" /></motion.div>
                                                 ) : <Circle size={16} className="text-gray-700" />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-xs text-gray-600">#{step.id}</span>
-                                                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-neon-green/70 bg-neon-green/10">💻 Terminal</span>
+                                                    {isChallenge ? (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-purple-400/70 bg-purple-400/10">🧠 Challenge</span>
+                                                    ) : (
+                                                        <span className="font-mono text-xs px-1.5 py-0.5 rounded-full text-neon-green/70 bg-neon-green/10">💻 Terminal</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? 'text-white' : 'text-gray-600'}`}>{step.title}</p>
+                                                    <p className={`font-mono text-xs font-bold ${isDone ? 'text-neon-green/70' : isActive ? (isChallenge ? 'text-purple-300' : 'text-white') : 'text-gray-600'}`}>{step.title}</p>
                                                     {isDone && (
                                                         <button onClick={() => setReviewingStepId((p) => p === step.id ? null : step.id)}
                                                             className="flex items-center gap-1 font-mono text-xs text-neon-green/50 hover:text-neon-green transition-colors ml-2 flex-shrink-0">
@@ -132,33 +137,40 @@ export default function Lab03() {
                                                         </button>
                                                     )}
                                                 </div>
-                                                <AnimatePresence>
-                                                    {isActive && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
-                                                            <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
-                                                                <span className="font-mono text-xs text-neon-amber/60">💡 Type in the <span className="text-neon-amber">Terminal</span>:</span>
-                                                                <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
-                                                            </div>
-                                                            <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                <AnimatePresence>
-                                                    {isDone && reviewingStepId === step.id && (
-                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                            <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
-                                                                <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
-                                                                <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
-                                                                    <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
-                                                                    <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                {isChallenge && step.challengeData && (
+                                                    <ChallengeStep data={step.challengeData} isActive={isActive} isDone={isDone} onComplete={() => completeStep(step.id)} />
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isActive && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <p className="font-mono text-xs text-gray-400 mt-2 leading-relaxed">{step.objective}</p>
+                                                                <div className="mt-2 bg-dark-bg border border-neon-amber/20 rounded-lg p-2">
+                                                                    <span className="font-mono text-xs text-neon-amber/60">💡 Type in the <span className="text-neon-amber">Terminal</span>:</span>
+                                                                    <code className="block font-mono text-sm text-neon-green mt-1 break-all">{step.hint}</code>
                                                                 </div>
-                                                                <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
-                                                            </div>
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                                {isDone && reviewingStepId !== step.id && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Complete</p>}
+                                                                <p className="font-cairo text-xs text-neon-orange/60 italic mt-2">{step.quipAr}</p>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {!isChallenge && (
+                                                    <AnimatePresence>
+                                                        {isDone && reviewingStepId === step.id && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                <div className="mt-2 pt-2 border-t border-neon-green/20 space-y-2">
+                                                                    <p className="font-mono text-xs text-gray-400 leading-relaxed">{step.objective}</p>
+                                                                    <div className="bg-dark-bg border border-neon-green/20 rounded-lg p-2">
+                                                                        <span className="font-mono text-xs text-neon-green/50">✓ Command used:</span>
+                                                                        <code className="block font-mono text-sm text-neon-green/80 mt-1 break-all">{step.hint}</code>
+                                                                    </div>
+                                                                    <p className="font-cairo text-xs text-neon-green/50 italic">{step.quipAr}</p>
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                )}
+                                                {isDone && reviewingStepId !== step.id && !isChallenge && <p className="font-mono text-xs text-neon-green/40 mt-1">✓ Complete</p>}
                                             </div>
                                         </div>
                                     </motion.div>
@@ -199,7 +211,7 @@ export default function Lab03() {
                             <span className="font-mono text-xs text-gray-700 bg-dark-card border border-dark-border/50 px-3 py-1 rounded-full">⚠ Simulated</span>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-hidden p-5">
+                    <div className="flex-1 overflow-hidden">
                         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="h-full">
                             <BusterTerminal currentStepId={currentStepId} onCommandRun={handleCommandRun} />
                         </motion.div>
