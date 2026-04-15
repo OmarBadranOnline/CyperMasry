@@ -1,7 +1,7 @@
 /**
  * ProgressContext — per-user lab progress locally stored
  * Falls back to localStorage 100% since backend is removed.
- * Lab N is unlocked when lab N-1 is fully complete (or it's lab 1)
+ * Labs are open by default unless a card is explicitly marked `locked` in metadata.
  */
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react'
 
@@ -65,12 +65,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }, [completedLabs])
 
     const isLabUnlocked = useCallback((labNumber: number) => {
-        if (labNumber <= 2) return true          // Labs 01 & 02 always unlocked
-
-        // Labs 3–5: require previous lab to be fully complete
-        const prevSlug = `lab${String(labNumber - 1).padStart(2, '0')}`
-        return completedLabs.includes(prevSlug)
-    }, [completedLabs])
+        return labNumber >= 1
+    }, [])
 
     const getCompletedSteps = useCallback((labSlug: string): number[] => {
         return progress[labSlug]?.completed_steps ?? []

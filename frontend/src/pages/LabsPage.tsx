@@ -13,7 +13,7 @@ import type { LabMeta } from '../labs/types'
 import { useProgress } from '../context/ProgressContext'
 
 const LAB_TOTAL_STEPS: Record<string, number> = {
-    lab01: 17, lab02: 16, lab03: 16, lab04: 16, lab05: 16,
+    lab01: 17, lab02: 16, lab03: 16, lab04: 16, lab05: 16, lab06: 10,
 }
 
 // ── Difficulty color helper ──────────────────────────────────────────────────
@@ -26,7 +26,7 @@ function difficultyStyle(d: LabMeta['difficulty']) {
 // ── Lab Card ─────────────────────────────────────────────────────────────────
 function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
     const navigate = useNavigate()
-    const { getCompletedSteps, isLabUnlocked } = useProgress()
+    const { getCompletedSteps } = useProgress()
 
     const labSlug = lab.slug
     const totalSteps = LAB_TOTAL_STEPS[labSlug] ?? 10
@@ -35,10 +35,8 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
     const pct = totalSteps > 0 ? Math.round((completed / totalSteps) * 100) : 0
     const progress = { completed, total: totalSteps, pct }
 
-    // Dynamically locked: lab > 1 needs previous complete depending on ProgressContext rules
-    const labNumberInt = parseInt(lab.number, 10)
-    const dynamicallyLocked = labNumberInt > 1 && !isLabUnlocked(labNumberInt)
-    const effectiveLocked = lab.locked || dynamicallyLocked
+    const effectiveLocked = lab.locked
+    const isSpecialLab = lab.slug === 'lab06'
 
     const isDone = pct === 100
     const hasStarted = completed > 0 && !isDone
@@ -53,6 +51,8 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
             onClick={() => !effectiveLocked && navigate(`/lab/${lab.slug}`)}
             className={`group relative rounded-2xl border bg-dark-card overflow-hidden transition-all duration-300 ${effectiveLocked
                 ? 'border-dark-border opacity-60 cursor-not-allowed'
+                : isSpecialLab
+                    ? 'border-cyan-300/45 cursor-pointer hover:border-fuchsia-300/70'
                 : isDone
                     ? 'border-neon-green/40 cursor-pointer hover:border-neon-green/70'
                     : hasStarted
@@ -60,13 +60,19 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                         : 'border-dark-border/80 cursor-pointer hover:border-neon-amber/40'
                 }}`}
             style={
-                isDone
+                isSpecialLab
+                    ? { boxShadow: '0 0 28px rgba(34,211,238,0.12)' }
+                    : isDone
                     ? { boxShadow: '0 0 20px rgba(0,255,65,0.07)' }
                     : hasStarted
                         ? { boxShadow: '0 0 20px rgba(255,191,0,0.06)' }
                         : undefined
             }
         >
+            {isSpecialLab && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-fuchsia-400" />
+            )}
+
             {/* Completed banner */}
             {isDone && (
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-neon-green via-neon-amber to-neon-green" />
@@ -75,16 +81,6 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
             {/* In-progress bar top */}
             {hasStarted && !isDone && (
                 <div className="absolute top-0 left-0 h-0.5 bg-neon-amber/70" style={{ width: `${pct}%` }} />
-            )}
-
-            {/* Dynamic lock overlay tooltip */}
-            {dynamicallyLocked && !lab.locked && (
-                <div className="absolute inset-0 bg-dark-bg/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
-                    <div className="text-center">
-                        <div className="text-3xl mb-1">🔒</div>
-                        <p className="font-cairo text-xs text-gray-500">أكمل اللاب اللي قبله الأول</p>
-                    </div>
-                </div>
             )}
 
             <div className="p-6">
@@ -107,6 +103,12 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                             {lab.isNew && (
                                 <span className="font-mono text-xs text-neon-green/90 bg-neon-green/10 border border-neon-green/30 px-2 py-0.5 rounded-full animate-pulse">
                                     New!
+                                </span>
+                            )}
+
+                            {isSpecialLab && (
+                                <span className="font-mono text-xs text-cyan-200 bg-cyan-400/10 border border-cyan-300/40 px-2 py-0.5 rounded-full">
+                                    Special Category
                                 </span>
                             )}
 
@@ -134,7 +136,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
 
                             {effectiveLocked && (
                                 <span className="font-mono text-xs text-gray-600 flex items-center gap-1">
-                                    <Lock size={10} /> {dynamicallyLocked && !lab.locked ? 'Complete prev lab' : 'Locked'}
+                                    <Lock size={10} /> Locked
                                 </span>
                             )}
                         </div>
@@ -149,8 +151,11 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
 
                         {/* Tags */}
                         <div className="flex flex-wrap gap-1 mb-4">
-                            {lab.tags.map((tag) => (
-                                <span key={tag} className="font-mono text-xs text-gray-700 bg-dark-bg border border-dark-border/50 px-1.5 py-0.5 rounded">
+                                {lab.tags.map((tag) => (
+                                <span key={tag} className={`font-mono text-xs px-1.5 py-0.5 rounded ${isSpecialLab
+                                    ? 'text-cyan-100/80 bg-cyan-500/10 border border-cyan-300/25'
+                                    : 'text-gray-700 bg-dark-bg border border-dark-border/50'
+                                    }`}>
                                     {tag}
                                 </span>
                             ))}
@@ -192,7 +197,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
                                     </>
                                 ) : (
                                     <>
-                                        <ChevronRight size={14} /> Start Mission
+                                        <ChevronRight size={14} /> {isSpecialLab ? 'Start Special Mission' : 'Start Mission'}
                                     </>
                                 )}
                             </div>
@@ -218,7 +223,7 @@ function LabCard({ lab, index }: { lab: LabMeta; index: number }) {
 
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 function StatsBar() {
-    const { completedLabs, totalScore, getCompletedSteps } = useProgress()
+    const { completedLabs, totalScore } = useProgress()
     const completedCount = completedLabs.length
     const totalPct = LAB_REGISTRY.length > 0 ? Math.round((completedCount / LAB_REGISTRY.length) * 100) : 0
     const earnedPts = totalScore
@@ -267,16 +272,16 @@ function StatsBar() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LabsPage() {
-    const [filter, setFilter] = useState<'all' | 'available' | 'completed' | 'in-progress'>('all')
+    const [filter, setFilter] = useState<'all' | 'available' | 'completed' | 'in-progress' | 'special'>('all')
 
-    const { isLabUnlocked, getCompletedSteps, isLabComplete } = useProgress()
+    const { getCompletedSteps, isLabComplete } = useProgress()
 
     const filtered = LAB_REGISTRY.filter((lab) => {
         if (filter === 'all') return true
         const labSlug = lab.slug
-        const labNumber = parseInt(lab.number, 10)
-        if (filter === 'available') return !lab.locked && isLabUnlocked(labNumber)
+        if (filter === 'available') return !lab.locked
         if (filter === 'completed') return isLabComplete(labSlug)
+        if (filter === 'special') return lab.slug === 'lab06'
         if (filter === 'in-progress') {
             const steps = getCompletedSteps(labSlug)
             return steps.length > 0 && !isLabComplete(labSlug)
@@ -286,6 +291,7 @@ export default function LabsPage() {
 
     const filterOptions = [
         { id: 'all', label: 'All Labs' },
+        { id: 'special', label: 'Special' },
         { id: 'available', label: 'Unlocked' },
         { id: 'in-progress', label: 'In Progress' },
         { id: 'completed', label: 'Completed' },

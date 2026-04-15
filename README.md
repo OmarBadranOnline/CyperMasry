@@ -39,6 +39,7 @@ Cyber-Masry is a **browser-based cybersecurity lab platform** that puts students
 | 03 | El-Daraaj El-Serry / الدراج السري | Directory Enumeration (Gobuster) | Intermediate | 175 |
 | 04 | El-Ekhteraq / الاختراق | SQL Injection | Intermediate | 200 |
 | 05 | El-Basaama / البصمة | Banner Grabbing & CVE Analysis | Advanced | 250 |
+| 06 | El-Dokhool El-Khafee / الدخول الخفي | Rapid Initial Access Simulation (10-Min) | Intermediate | 120 |
 
 ---
 
@@ -146,7 +147,8 @@ Cyber-Masry/
 │       │   ├── lab02/ → NmapTerminal · useMissionProgress · Page · meta
 │       │   ├── lab03/ → BusterTerminal · useMissionProgress · Page · meta
 │       │   ├── lab04/ → SQLiTerminal · useMissionProgress · Page · meta
-│       │   └── lab05/ → BannerTerminal · useMissionProgress · Page · meta
+│       │   ├── lab05/ → BannerTerminal · useMissionProgress · Page · meta
+│       │   └── lab06/ → AccessTerminal · useMissionProgress · Page · meta
 │       └── pages/
 │           ├── LandingPage.tsx
 │           ├── LabsPage.tsx

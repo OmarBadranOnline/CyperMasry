@@ -100,6 +100,18 @@ const LAB_STEP_MESSAGES: Record<string, Record<number, { ar: string; en: string 
         15: { ar: 'فيه نسخة WordPress قديمة! استخدم WPScan. ⚠️', en: 'Step 15: Pivot directly to WPScan for CMS vulnerabilities.' },
         16: { ar: 'وصلت للاستغلال المطلوب. 🎯', en: 'Step 16: Submit proof of outdated stack CMS.' },
     },
+    'lab06': {
+        1: { ar: 'ابدأ سريع: شوف headers بتاعة صفحة الـ login. 👀', en: 'Step 1: Inspect login endpoint headers.' },
+        2: { ar: 'استخرج usernames المحتملة من الأنماط العامة. 🧠', en: 'Step 2: Enumerate likely usernames.' },
+        3: { ar: 'اختبار كلمات سر بشكل مُحكَم داخل اللاب. 🔒', en: 'Step 3: Run controlled credential spray simulation.' },
+        4: { ar: 'سؤال غامض: إيه السبب الحقيقي لنجاح الدخول؟ 🕵️', en: 'Step 4: Mystery challenge — identify root weakness.' },
+        5: { ar: 'حلّل ملف الـ cookies المسربة. 🍪', en: 'Step 5: Investigate captured session artifacts.' },
+        6: { ar: 'اختبر replay للـ token وشوف التأثير. 🎭', en: 'Step 6: Simulate session replay impact.' },
+        7: { ar: 'سؤال غامض تاني: أول خطوة containment؟', en: 'Step 7: Mystery challenge — best immediate containment.' },
+        8: { ar: 'راجع الصلاحيات للحساب المخترق. 🧾', en: 'Step 8: Validate compromised account privilege level.' },
+        9: { ar: 'هات الدليل الجنائي من ملف الحادثة. 📁', en: 'Step 9: Capture forensic proof artifact.' },
+        10: { ar: 'قدّم الفلاج النهائي واقفل المهمة. 🚩', en: 'Step 10: Submit final mission flag.' },
+    },
 }
 
 const GENERAL_TIPS = [

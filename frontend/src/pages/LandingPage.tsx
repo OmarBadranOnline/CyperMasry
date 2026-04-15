@@ -141,7 +141,7 @@ export default function LandingPage() {
                         <div className="font-mono text-neon-amber/60 text-sm mb-2">// available_labs</div>
                         <h2 className="font-mono font-bold text-3xl text-white">Available Labs</h2>
                         <p className="font-mono text-sm text-gray-600 mt-2">
-                            Complete in order. Each lab unlocks new skills.
+                            Jump into any lab. Pick your mission and start learning.
                         </p>
                     </motion.div>
 
